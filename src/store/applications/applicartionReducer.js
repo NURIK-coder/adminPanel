@@ -1,7 +1,7 @@
 const InitialState = {
     applications: [],
     applicationDetail:{},
-    
+    leaders: []
 }
 
 export const ApplicationReduser = (state=InitialState, action)=>{
@@ -10,7 +10,8 @@ export const ApplicationReduser = (state=InitialState, action)=>{
             return{...state, applications: action.payload}
         case 'SET_APPLICATION':
             return{...state, applicationDetail: action.payload}
-        
+        case 'SET_LEADERS':
+            return{...state, leaders: action.payload}
         default:
             return state
     }

@@ -1,7 +1,5 @@
 import { Routes, Route, BrowserRouter } from "react-router-dom"
 import Error from "../pages/Eror";
-import TestPage from "../pages/Test";
-import TestDetail from "../pages/TestDetail";
 import Login from "../pages/Login";
 import ApplicationsPage from "../pages/ApplicationsPage";
 import ProfilePage from "../pages/ProfilePage";
@@ -14,8 +12,7 @@ function Layout(){
         <BrowserRouter>
             <Routes>
                 <Route path="/" element={<Login />} />
-                <Route path="/testsList/" element={<TestPage />} />
-                <Route path="/test/:id" element={<TestDetail />} />
+                
                 <Route path="/admin/login" element={<Login />} />
 
                 {/* ✅ Admin routes под защитой */}

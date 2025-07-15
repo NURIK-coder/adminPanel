@@ -1,146 +1,184 @@
-import { useEffect } from "react";
-import { useSelector } from "react-redux";
-import { store } from "../../store/store";
-import { fetchAllStats } from "../../store/status/statusActions";
-import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 import {
-  PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend
+  PieChart, Pie, Cell, Tooltip, ResponsiveContainer,
+  BarChart, Bar, XAxis, YAxis
 } from "recharts";
 
+const COLORS = ["#6366F1", "#10B981", "#F59E0B", "#EF4444", "#06B6D4"];
+
 export default function Dashboard() {
-  const stats = useSelector((state) => state.statsInfo.stats);
-  const types = useSelector((state) => state.statsInfo.stats_applications_by_type);
-  const gpa = useSelector((state) => state.statsInfo.stats_gpa);
-  const gender = useSelector((state) => state.statsInfo.stats_students_by_gender);
-  const university = useSelector((state) => state.statsInfo.stats_students_by_university);
-  const faculties = useSelector((state) => state.statsInfo.stats_faculty_students);
-  console.log("TYPES:",  types);
-  
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    store.dispatch(fetchAllStats());
+    fetch("https://tanlov.medsfera.uz/api/stats/", {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    })
+      .then(res => res.json())
+      .then(data => {
+        setData(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error("Error loading stats:", err);
+        setLoading(false);
+      });
   }, []);
 
-  const COLORS = ["#FF6384", "#36A2EB", "#FFCE56", "#4CAF50", "#A66DD4", "#FF8C42"];
-
-  const gpaData = [
-    { name: "1-2", value: gpa["1-2"] || 0 },
-    { name: "2-3", value: gpa["2-3"] || 0 },
-    { name: "3-4", value: gpa["3-4"] || 0 },
-    { name: "4+", value: gpa["4+"] || 0 },
-  ];
-
-  if (!stats || !types || !gpa || !gender || !university || !faculties) {
-    return (<p className="text-center mt-20 text-gray-500 text-lg">Yuklanmoqda...</p>)  ;
+  if (loading || !data) {
+    return (
+      <div className="min-h-screen flex justify-center items-center">
+        <div className="w-16 h-16 border-4 border-blue-500 border-dashed rounded-full animate-spin" />
+      </div>
+    );
   }
 
+  const topAppType = data.application_types.reduce((a, b) =>
+    a.count > b.count ? a : b
+  );
+
   return (
-    <div className="p-6 min-h-screen bg-gray-50">
-      <h1 className="text-3xl font-bold text-blue-700 mb-8">📊 Statistika Paneli</h1>
+    <div className="min-h-screen bg-gradient-to-br from-[#eef2ff] to-[#f7f9fc] p-6">
+      <div className="bg-white shadow-lg rounded-xl px-6 py-4 text-center mb-8">
+        <h1 className="text-xl md:text-2xl font-bold text-gray-800">Platforma statistikasi</h1>
+      </div>
 
-      {/* Типы заявок */}
-      <section className="mb-10">
-        <h2 className="text-xl font-semibold mb-4">📂 Ariza turlari</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {types?.map((type, i) => (
-            <motion.div
-              key={type.key}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: i * 0.1 }}
-              className="bg-white p-5 rounded-xl border shadow"
-            >
-              <p className="text-gray-700 font-medium">{type.name}</p>
-              <p className="text-2xl font-bold text-blue-600">{type.application_count}</p>
-            </motion.div>
-          ))}
-        </div>
-      </section>
+      {/* Top Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <StatCard title="Umumiy talabalar" value={data.students.total} />
+        <StatCard title="GPA: 4+" value={data.gpa_distribution["4+"]} />
+        <StatCard title="Test o‘rtacha" value={data.application_items.avg_test_result} />
+        <StatCard title="Eng ko‘p ariza turi" value={topAppType.application_type__name} blue />
+      </div>
 
-      {/* GPA Chart */}
-      <section className="mb-10">
-        <h2 className="text-xl font-semibold mb-4">📈 GPA taqsimoti</h2>
-        <div className="bg-white p-6 rounded-xl shadow w-full h-96 ">
-          <ResponsiveContainer width="100%" height="100%">
+      {/* Charts & Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <Card title="Jins bo‘yicha taqsimot">
+          <ResponsiveContainer width="100%" height={220}>
             <PieChart>
               <Pie
-                data={gpaData}
-                cx="50%"
-                cy="50%"
-                outerRadius={100}
-                fill="#8884d8"
-                dataKey="value"
-                label
+                data={data.students.by_gender}
+                dataKey="count"
+                nameKey="gender"
+                cx="50%" cy="50%"
+                outerRadius={80}
+                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
               >
-                {gpaData.map((entry, index) => (
+                {data.students.by_gender.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
               <Tooltip />
-              <Legend />
             </PieChart>
           </ResponsiveContainer>
-        </div>
-      </section>
+        </Card>
 
-      {/* Пол студентов */}
-      <section className="mb-10 ">
-        <h2 className="text-xl font-semibold mb-4">👩‍🎓 Talabalar jinsi bo‘yicha</h2>
-      
-          <div className="flex flex-wrap gap-4 justify-center">
-            {gender.map((g, i) => (
-              <motion.div
-                key={g.gender}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: i * 0.1 }}
-                className="bg-white p-4 rounded-xl border shadow w-[48%] md:w-[30%] lg:w-[22%] min-w-[150px]"
-              >
-                <p className="text-gray-700">{g.gender}</p>
-                <p className="text-2xl font-bold text-blue-600">{g.count}</p>
-              </motion.div>
-            ))}
-          </div>
+        <Card title="Kurs bo‘yicha taqsimot">
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={data.students.by_level}>
+              <XAxis dataKey="level__name" />
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey="count" fill="#10B981" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </Card>
 
+        <Card title="GPA oralig‘i bo‘yicha taqsimot">
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart
+              data={Object.entries(data.gpa_distribution).map(([range, count]) => ({ range, count }))}
+            >
+              <XAxis dataKey="range" />
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey="count" fill="#F59E0B" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </Card>
+      </div>
+
+      {/* Lists */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         
-      </section>
 
-      {/* Университеты */}
-      <section className="mb-10">
-        <h2 className="text-xl font-semibold mb-4">🏫 Universitetlar bo‘yicha</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {university.map((u, i) => (
-            <motion.div
-              key={u.university}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: i * 0.05 }}
-              className="bg-white p-4 rounded-xl border shadow"
-            >
-              <p className="text-gray-700 font-medium">{u.university}</p>
-              <p className="text-xl font-bold text-blue-600">{u.count}</p>
-            </motion.div>
-          ))}
+        <div className="col-span-full">
+          <Card title="Fakultet bo‘yicha taqsimot">
+            <div className="w-full h-[700px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={data.students.by_faculty.filter(f => f.faculty__name !== null)}
+                  layout="vertical"
+                  margin={{ top: 20, right: 40, left: 10, bottom: 20 }}
+                  
+                >
+                  <XAxis type="number" />
+                  <YAxis
+                    dataKey="faculty__name"
+                    type="category"
+                    width={450}
+                    
+                    tick={{ fontSize: 15 }}
+                  />
+                  <Tooltip />
+                  <Bar dataKey="count" fill="#6366F1" barSize={20} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
         </div>
-      </section>
+        <div className="flex justify-center flex-row gap-5 col-span-full ">
+            <Card title="Arizalar turlari bo‘yicha statistikasi">
+            <ul className="space-y-2 px-10 py-3 w-[500px]">
+              {data.application_types.map((item, i) => (
+                <li
+                  key={i}
+                  className="flex justify-between items-center bg-white rounded-md px-3 py-2 shadow hover:shadow-md transition"
+                >
+                  <span className="text-sm">{item.application_type__name}</span>
+                  <span className="text-blue-600 font-bold">{item.count}</span>
+                </li>
+              ))}
+            </ul>
+          </Card>
 
-      {/* Факультеты */}
-      <section className="mb-10">
-        <h2 className="text-xl font-semibold mb-4">🏛️ Fakultetlar bo‘yicha</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {faculties.map((f, i) => (
-            <motion.div
-              key={f.faculty}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: i * 0.05 }}
-              className="bg-white p-4 rounded-xl border shadow"
-            >
-              <p className="text-gray-700 font-medium">{f.faculty}</p>
-              <p className="text-xl font-bold text-blue-600">{f.count}</p>
-            </motion.div>
-          ))}
+          <Card title="Ariza topshirish uchun ro'yxatdan o'tgan talabalar soni">
+            <ul className="space-y-2 w-[500px] px-10 py-3">
+              {data.students.by_university.map((item, i) => (
+                <li
+                  key={i}
+                  className="flex justify-between items-center bg-white rounded-md px-3 py-2 shadow hover:shadow-md transition"
+                >
+                  <span className="text-sm">{item.university}</span>
+                  <span className="text-blue-600 font-bold">{item.count}</span>
+                </li>
+              ))}
+            </ul>
+          </Card>
         </div>
-      </section>
+        
+      </div>
+    </div>
+  );
+}
+
+
+function StatCard({ title, value, blue = false }) {
+  return (
+    <div className="bg-white p-4 rounded-xl shadow text-center hover:shadow-md transition transform hover:-translate-y-2">
+      <div className="text-sm text-gray-600 font-medium">{title}</div>
+      <div className={`text-xl font-bold ${blue ? "text-blue-600" : "text-gray-800"}`}>{value}</div>
+    </div>
+  );
+}
+
+function Card({ title, children }) {
+  return (
+    <div className="bg-white p-4 rounded-xl shadow hover:shadow-md transition transform hover:-translate-y-2">
+      <h3 className="text-base font-semibold text-gray-800 mb-3">{title}</h3>
+      {children}
     </div>
   );
 }

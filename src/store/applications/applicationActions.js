@@ -180,3 +180,36 @@ export const sendScoreWithAuth = (data) => async (dispatch, getState) => {
     return await response.json();
 };
 
+export const LeaderList = () => {
+    return async (dispatch) => {
+        const request = () =>
+            fetch(URL + `admin/leaderboard/`, {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${localStorage.getItem('token')}`,
+                }
+            });
+
+        let res = await request();
+
+        if (res.status === 401) {
+            const refreshed = await refreshToken();
+            if (!refreshed) {
+                await loginAndSaveToken();
+                res = await request();
+            }
+
+        }
+
+        if (res.status === 403) {
+            const error = await res.json();
+            return error.detail || "Xatolik yuz berdi.";
+        }
+
+        if (res.ok) {
+            const data = await res.json();
+            dispatch({ type: 'SET_LEADERS', payload: data });
+            return { payload: data }
+        }
+    };
+};  

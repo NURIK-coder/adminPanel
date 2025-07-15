@@ -130,6 +130,12 @@ export default function ApplicationsList() {
                         <img 
                         src="https://img.freepik.com/premium-psd/contact-icon-illustration-isolated_23-2151903357.jpg?semt=ais_hybrid&w=740"
                         className="w-[50px] rounded-full shadow-xl border-[1px]"/>
+                        <div className="flex flex-col mx-3 ">
+                          <p className="mx-2 text-[15px]">GPA: {app.student.gpa_records[0].gpa}</p>
+                          <h4 className="font-bold text-green-600">JAMI: <span className="text-gray-700 ">{app.total_score}</span></h4>
+                        </div>
+                        
+
                       <div className="mx-auto text-center">
                         <p className="text-sm text-gray-500">{new Date(app.submitted_at).toISOString().split("T")[0]}</p>
                         <p className="font-medium text-gray-800">{app.student.full_name}</p>
@@ -177,7 +183,10 @@ export default function ApplicationsList() {
 
                     {expandedAppId === app.id && selectedDetail?.items && (
                       <div className="p-5 bg-white border rounded-xl shadow-md space-y-4 mt-6 transition">
-                        <h4 className="text-lg font-semibold text-gray-800">Yo‘nalishlar</h4>
+                        <div className="flex justify-between">
+                          <h4 className="text-lg font-semibold text-gray-800">Yo‘nalishlar</h4>
+                        </div>
+                        
 
                         {selectedDetail.items.map((item, idx) => (
                           <div key={idx} className="p-4 bg-gray-50 border border-gray-200 rounded-lg shadow-sm">
@@ -188,7 +197,7 @@ export default function ApplicationsList() {
                                   href={item.files[0].file}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="text-sm text-white rounded  p-2 bg-blue-700 mt-1"
+                                  className="text-sm text-white rounded p-2 bg-blue-700 mt-1"
                                 >
                                   Faylni ko‘rish ⬆️
                                 </a>
@@ -198,7 +207,41 @@ export default function ApplicationsList() {
                             </div>
 
                             <div className="mt-4">
-                              {item.score === undefined || item.score === null ? (
+                              {(item.direction_name === "Kitobxonlik madaniyati" || item.direction_name === "Talabaning akademik o‘zlashtirishi") ? (
+                                <div className="text-sm text-gray-700 space-y-1">
+                                  <p>
+                                     <span className="font-medium text-purple-800">🤖Baholadi: <i className="text-gray-700">Tizim(avtomatik)</i></span>{" "}
+                                    
+                                  </p>
+                                  {item.direction_name === "Talabaning akademik o‘zlashtirishi" ?(
+                                    <p>
+                                      🎓 <span className="font-medium text-gray-800">GPA:</span>{" "}
+                                        {selectedDetail?.student.gpa_records[0].gpa ?? "0"}
+                                    </p>
+                                  ):(
+                                    <div>
+                                      <p>
+                                        📊 <span className="font-medium text-gray-800">Test natijasi: </span>
+                                        {item.test_result != null ? `${item.test_result}%` : "Noma’lum"}
+                                      </p>
+                                      <p>
+                                        🧮 <span className="font-medium text-gray-800">Test ball:</span>{" "}
+                                        {item.test_ball ?? "0"}
+                                      </p>
+                                    </div>
+                                    
+                                  )}
+                                  
+                                  
+                                  {item.direction_name != "Kitobxonlik madaniyati" && (
+                                     <p>
+                                      🎓 <span className="font-medium text-gray-800">GPA (ball):</span>{" "}
+                                      {item?.gpa_ball ?? "0"}
+                                    </p>
+                                  )}
+                                 
+                                </div>
+                              ) : item.score === undefined || item.score === null ? (
                                 <div className="space-y-3">
                                   <div className="flex items-center gap-4">
                                     <select
@@ -207,12 +250,17 @@ export default function ApplicationsList() {
                                       className="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     >
                                       <option value="" disabled>Bahoni tanlang</option>
-                                      {[...Array(11)].map((_, i) => (
-                                        <option key={i} value={i}>{i}</option>
+                                      {Array.from(
+                                        { length: Number(item.max_score) - Number(item.min_score) + 1 },
+                                        (_, i) => Number(item.min_score) + i
+                                      ).map((score) => (
+                                        <option key={score} value={score}>
+                                          {score}
+                                        </option>
                                       ))}
                                     </select>
-                                    
                                   </div>
+
                                   {openCommentFields[item.id] ? (
                                     <textarea
                                       placeholder="Kommentariyani kiriting..."
@@ -229,21 +277,27 @@ export default function ApplicationsList() {
                                     </button>
                                   )}
 
-                                  
                                   <button
-                                      onClick={() => handleSaveScore(item.id)}
-                                      className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-                                    >
-                                      Saqlash
-                                    </button>
+                                    onClick={() => handleSaveScore(item.id)}
+                                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+                                  >
+                                    Saqlash
+                                  </button>
                                 </div>
                               ) : (
                                 <span className="text-green-600 font-medium text-sm">
-                                  ✅ Baholangan: {item.score.value} <p className="text-gray-700">✍️Izoh: {item.score.note || "Izoh yo'zilmagan"}</p>
+                                  <p className="text-red-700">
+                                    👨‍🏫Baholadi: <span className="text-gray-700">{item.score.reviewer2}</span>
+                                  </p>
+                                  ✅ Baholangan: <span className="text-gray-700">{item.score.value}</span>
+                                  <p className="text-gray-700">
+                                    ✍️Izoh: <i>{item.score.note || "Izoh yo'zilmagan"}</i>
+                                  </p>
                                 </span>
                               )}
                             </div>
                           </div>
+
                         ))}
                       </div>
                     )}

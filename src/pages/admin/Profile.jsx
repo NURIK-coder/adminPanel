@@ -54,27 +54,27 @@ export default function Profile() {
           </button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
-          <div>
+          <div className="p-3 rounded shadow hover:shadow-xl border-  ">
             <p className="text-sm text-gray-500">Foydalanuvchi nomi</p>
             <p className="font-medium">@{user.username}</p>
           </div>
-          <div>
+          <div className="p-3 rounded shadow hover:shadow-xl border-  ">
             <p className="text-sm text-gray-500">Email</p>
             <p className="font-medium">{user.email || "—"}</p>
           </div>
-          <div>
+          <div className="p-3 rounded shadow hover:shadow-xl border-  ">
             <p className="text-sm text-gray-500">Faollik</p>
             <p className="font-medium">{user.is_active ? "Faol" : "Faol emas"}</p>
           </div>
-          <div>
-            <p className="text-sm text-gray-500">Ball qo'yishi mumkinmi</p>
-            <p className="font-medium">{user.can_score ? "Ha" : "Yo'q"}</p>
+          <div className="p-3 rounded shadow hover:shadow-xl border-  ">
+            <p className="text-sm font-bold text-gray-700 ">Ball qo'yishi mumkinmi</p>
+            <p className="font-medium" > <span className="font-bold" style={user.can_score ? {color:'green'} : {color: 'red'}}>{user.can_score ? "Ha" : "Yo'q"}</span></p>
           </div>
-          <div>
+          <div className="p-3 rounded shadow hover:shadow-xl border-  ">
             <p className="text-sm text-gray-500">Barcha talabalar ruxsat etilganmi?</p>
             <p className="font-medium">{user.allow_all_students ? "Ha" : "Yo'q"}</p>
           </div>
-          <div>
+          <div className="p-3 rounded shadow hover:shadow-xl border-  ">
             <p className="text-sm text-gray-500">Kurs bo‘yicha cheklov</p>
             <p className="font-medium">{user.limit_by_course ? "Ha" : "Yo'q"}</p>
           </div>

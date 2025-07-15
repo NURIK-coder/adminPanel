@@ -1,89 +1,38 @@
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { store } from "../store/store";
-import { ApplicationList } from "../store/applications/applicationActions";
-
-
-const leaders = [
-  {
-    id: 1,
-    name: "Thomas L. Fletcher",
-    profession: "Product Designer",
-    score: 9.4,
-    views: 4560,
-    rating: 5.0,
-    image: "https://i.pravatar.cc/150?img=1",
-  },
-  {
-    id: 2,
-    name: "Jane Cooper",
-    profession: "UI Designer",
-    score: 9.2,
-    views: 4480,
-    rating: 4.9,
-    image: "https://i.pravatar.cc/150?img=2",
-  },
-  {
-    id: 3,
-    name: "Wade Warren",
-    profession: "Medical Student",
-    score: 9.1,
-    views: 4380,
-    rating: 4.8,
-    image: "https://i.pravatar.cc/150?img=3",
-  },
-  {
-    id: 4,
-    name: "Esther Howard",
-    profession: "Product Owner",
-    score: 8.9,
-    views: 4210,
-    rating: 4.7,
-    image: "https://i.pravatar.cc/150?img=4",
-  },
-  {
-    id: 5,
-    name: "Brooklyn Simmons",
-    profession: "Marketing Coordinator",
-    score: 8.8,
-    views: 4050,
-    rating: 4.6,
-    image: "https://i.pravatar.cc/150?img=5",
-  },
-  {
-    id: 6,
-    name: "Courtney Henry",
-    profession: "Medical Assistant",
-    score: 8.7,
-    views: 3980,
-    rating: 4.5,
-    image: "https://i.pravatar.cc/150?img=6",
-  },
-  {
-    id: 7,
-    name: "Darrell Steward",
-    profession: "Web Designer",
-    score: 8.5,
-    views: 3860,
-    rating: 4.4,
-    image: "https://i.pravatar.cc/150?img=7",
-  },
-];
+import { LeaderList } from "../store/applications/applicationActions";
 
 export default function LeaderTable() {
-  const applications = useSelector(a=>a.applicationsInfo.applications.results)
-  console.log(applications);
-  
-  const itemsPerPage = 4;
-  const [currentPage, setCurrentPage] = useState(1);
+  const leaders = useSelector((state) => state.applicationsInfo.leaders || []);
+  const [searchName, setSearchName] = useState("");
+  const [selectedFaculty, setSelectedFaculty] = useState("all");
+  const [selectedCourse, setSelectedCourse] = useState("all");
 
-  const totalPages = Math.ceil(leaders.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const visibleLeaders = leaders.slice(startIndex, startIndex + itemsPerPage);
+  useEffect(() => {
+    store.dispatch(LeaderList());
+  }, []);
 
-  useEffect(()=>{
-    store.dispatch(ApplicationList())
-  },[])
+  if (!leaders.length)
+    return <p className="text-center text-gray-500 py-10">Yuklanmoqda...</p>;
+
+  const sortedLeaders = [...leaders].sort(
+    (a, b) => b.total_score - a.total_score
+  );
+
+  const faculties = Array.from(new Set(leaders.map((l) => l.faculty))).filter(Boolean);
+  const courses = Array.from(new Set(leaders.map((l) => l.course))).filter(Boolean);
+
+  const filteredLeaders = sortedLeaders.filter((leader) => {
+    const matchName = leader.full_name
+      .toLowerCase()
+      .includes(searchName.toLowerCase());
+    const matchFaculty =
+      selectedFaculty === "all" || leader.faculty === selectedFaculty;
+    const matchCourse =
+      selectedCourse === "all" || leader.course === selectedCourse;
+    return matchName && matchFaculty && matchCourse;
+  });
 
   const getMedal = (index) => {
     if (index === 0) return "🥇";
@@ -95,98 +44,98 @@ export default function LeaderTable() {
   return (
     <div className="p-8 bg-gray-100 min-h-screen">
       <h1 className="text-3xl font-bold mb-6 text-gray-800">
-        🏆 Yo‘nalish bo‘yicha liderlar
+        🏆 Umumiy ball bo‘yicha liderlar
       </h1>
+
+      {/* --- ФИЛЬТРЫ --- */}
+      <div className="flex  flex-row justify-end items-center gap-4 mb-6">
+        <input
+          type="text"
+          placeholder="Ism bo‘yicha qidirish"
+          value={searchName}
+          onChange={(e) => setSearchName(e.target.value)}
+          className="px-4 py-2 rounded border w-full sm:w-64"
+        />
+
+        <select
+          value={selectedFaculty}
+          onChange={(e) => setSelectedFaculty(e.target.value)}
+          className="px-4 py-2 rounded border w-full sm:w-64"
+        >
+          <option value="all">Barcha fakultetlar</option>
+          {faculties.map((f, i) => (
+            <option key={i} value={f}>
+              {f}
+            </option>
+          ))}
+        </select>
+
+        <select
+          value={selectedCourse}
+          onChange={(e) => setSelectedCourse(e.target.value)}
+          className="px-4 py-2 rounded border w-full sm:w-64"
+        >
+          <option value="all">Barcha kurslar</option>
+          {courses.map((c, i) => (
+            <option key={i} value={c}>
+              {c}
+            </option>
+          ))}
+        </select>
+      </div>
 
       <div className="overflow-x-auto bg-white rounded-xl shadow-lg">
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50 text-left text-sm font-semibold text-gray-600">
+          <thead className="bg-gray-50 text-center text-sm font-semibold text-gray-600"
+          style={{ display: "table", width: "100%", tableLayout: "fixed" }}>
             <tr>
               <th className="px-6 py-3">#</th>
               <th className="px-6 py-3">Talaba</th>
-              <th className="px-6 py-3">Kasbi</th>
-              <th className="px-6 py-3">⭐ Baho</th>
-              <th className="px-6 py-3">👁 Ko‘rishlar</th>
-              <th className="px-6 py-3"></th>
+              <th className="px-6 py-3">Fakultet</th>
+              <th className="px-6 py-3">Kurs / Guruh</th>
+              <th className="px-6 py-3 text-right">Ball</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
-            {visibleLeaders.map((leader, index) => {
-              const globalIndex = startIndex + index;
-              const medal = getMedal(globalIndex);
-              const isTopThree = globalIndex < 3;
+
+          {/* --- СКРОЛЛИРУЕМЫЙ TBODY --- */}
+          <tbody
+            className="divide-y divide-gray-100"
+            style={{
+              display: "block",
+              maxHeight: "700px",
+              overflowY: "auto",
+            }}
+          >
+            {filteredLeaders.map((leader, index) => {
+              const medal = getMedal(index);
+              const isTopThree = index < 3;
 
               return (
                 <tr
-                  key={leader.id}
-                  className={`transition-all ${isTopThree ? "bg-yellow-50" : ""}`}
+                  key={leader.full_name}
+                  className={`transition-all ${
+                    isTopThree ? "bg-yellow-50 font-semibold" : ""
+                  }`}
+                  style={{ display: "table", tableLayout: "fixed", width: "100%" }}
                 >
-                  {/* # */}
                   <td className="px-6 py-4 text-center align-middle text-lg">
-                    {medal || globalIndex + 1}
+                    {medal || index + 1}
                   </td>
-
-                  {/* Talaba */}
+                  <td className="px-6 py-4 align-middle text-gray-800">
+                    {leader.full_name}
+                  </td>
+                  <td className="px-6 py-4 align-middle">{leader.faculty}</td>
                   <td className="px-6 py-4 align-middle">
-                    <div className="flex items-center gap-3">
-                      <img
-                        src={leader.image}
-                        alt={leader.name}
-                        className="w-10 h-10 rounded-full object-cover"
-                      />
-                      <span
-                        className={`text-gray-800 ${
-                          isTopThree ? "font-semibold text-lg" : "font-medium"
-                        }`}
-                      >
-                        {leader.name}
-                      </span>
-                    </div>
+                    {leader.course} / {leader.group}
                   </td>
-
-                  {/* Kasbi */}
-                  <td className="px-6 py-4 align-middle">{leader.profession}</td>
-
-                  {/* Baho */}
-                  <td className="px-6 py-4 align-middle font-semibold text-yellow-500 text-center">
-                    {leader.rating.toFixed(1)}
-                  </td>
-
-                  {/* Ko‘rishlar */}
-                  <td className="px-6 py-4 align-middle text-gray-600 text-center">
-                    {leader.views.toLocaleString()} ta
-                  </td>
-
-                  {/* Button */}
-                  <td className="px-6 py-4 align-middle text-center">
-                    <button className="bg-orange-500 text-white px-4 py-1 rounded hover:bg-orange-600">
-                      Follow
-                    </button>
+                  <td className="px-6 py-4 align-middle text-right font-bold text-blue-600">
+                    {leader.total_score}
                   </td>
                 </tr>
               );
             })}
           </tbody>
         </table>
-      </div>
-
-      {/* Pagination */}
-      <div className="flex justify-center mt-4 pb-4">
-        <div className="inline-flex space-x-2">
-          {Array.from({ length: totalPages }, (_, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrentPage(i + 1)}
-              className={`px-4 py-1 rounded border font-medium ${
-                currentPage === i + 1
-                  ? "bg-blue-600 text-white"
-                  : "bg-white text-gray-700 hover:bg-gray-100"
-              }`}
-            >
-              {i + 1}
-            </button>
-          ))}
-        </div>
       </div>
     </div>
   );
