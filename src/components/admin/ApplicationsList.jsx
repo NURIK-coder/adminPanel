@@ -10,17 +10,22 @@ export default function ApplicationsList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [expandedAppId, setExpandedAppId] = useState(null);
   const [selectedDetail, setSelectedDetail] = useState(null);
-  console.log(selectedDetail);
   const [openCommentFields, setOpenCommentFields] = useState({});
   const [scores, setScores] = useState({});
   const [comments, setComments] = useState({});
-
+  const [error, setError] = useState(null)
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const modalRef = useRef();
+  const [loading, setLoading] = useState(true)
+  const [errors, setErrors] = useState({});
+
+  console.log(selectedDetail);
+  
 
   const fetchApplications = async (page = 1) => {
     await store.dispatch(ApplicationList(page));
+    setLoading(false)
   };
 
   useEffect(() => {
@@ -80,12 +85,24 @@ export default function ApplicationsList() {
             // Можно также очистить введённые данные
             setScores((prev) => ({ ...prev, [id]: undefined }));
             setComments((prev) => ({ ...prev, [id]: "" }));
+            setErrors((prev) => ({ ...prev, [id]: null }));
             
 
         } catch (error) {
-            alert(error.message); // или setError(error.message)
+            setError(error.message)
+            setErrors((prev) => ({ ...prev, [id]: error.message }));
+            
+
+            // Удалить полностью через 4 секунды
+            setTimeout(() => {
+              setErrors((prev) => {
+                const updated = { ...prev };
+                delete updated[id];
+                return updated;
+              });
+            }, 3000);
+          }
         }
-    }
     };
 
 
@@ -99,6 +116,13 @@ export default function ApplicationsList() {
     acc[isoDate].push(app);
     return acc;
   }, {});
+  if (loading || !applications.length) {
+    return (
+      <div className="min-h-screen flex justify-center items-center">
+        <div className="w-16 h-16 border-4 border-blue-500 border-dashed rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   const totalPages = Math.ceil((paginationInfo?.count || 1) / 10);
 
@@ -130,7 +154,7 @@ export default function ApplicationsList() {
                         <img 
                         src="https://img.freepik.com/premium-psd/contact-icon-illustration-isolated_23-2151903357.jpg?semt=ais_hybrid&w=740"
                         className="w-[50px] rounded-full shadow-xl border-[1px]"/>
-                        <div className="flex flex-col mx-3 ">
+                        <div className="text-center mx-3 ">
                           <p className="mx-2 text-[15px]">GPA: {app.student.gpa_records[0].gpa}</p>
                           <h4 className="font-bold text-green-600">JAMI: <span className="text-gray-700 ">{app.total_score}</span></h4>
                         </div>
@@ -243,7 +267,18 @@ export default function ApplicationsList() {
                                 </div>
                               ) : item.score === undefined || item.score === null ? (
                                 <div className="space-y-3">
+                                  {errors[item.id] && (
+                                      <p
+                                        className={`p-3 rounded bg-red-300 text-red-900 transition-opacity duration-1000 ${
+                                          errors[item.id].fading ? "opacity-0" : "opacity-100"
+                                        }`}
+                                      >
+                                        ❌ {errors[item.id]}
+                                      </p>
+                                   )}
+
                                   <div className="flex items-center gap-4">
+                                    
                                     <select
                                       onChange={(e) => handleScoreChange(item.id, e.target.value)}
                                       defaultValue=""

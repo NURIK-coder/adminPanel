@@ -8,13 +8,20 @@ export default function LeaderTable() {
   const [searchName, setSearchName] = useState("");
   const [selectedFaculty, setSelectedFaculty] = useState("all");
   const [selectedCourse, setSelectedCourse] = useState("all");
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     store.dispatch(LeaderList());
+    setLoading(false);
   }, []);
+ if (loading || !leaders.length) {
+    return (
+      <div className="min-h-screen flex justify-center items-center">
+        <div className="w-16 h-16 border-4 border-blue-500 border-dashed rounded-full animate-spin" />
+      </div>
+    );
+  }
 
-  if (!leaders.length)
-    return <p className="text-center text-gray-500 py-10">Yuklanmoqda...</p>;
 
   const sortedLeaders = [...leaders].sort(
     (a, b) => b.total_score - a.total_score
@@ -86,7 +93,7 @@ export default function LeaderTable() {
 
       <div className="overflow-x-auto bg-white rounded-xl shadow-lg">
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50 text-center text-sm font-semibold text-gray-600"
+          <thead className="bg-blue-500 text-white text-center text-sm font-semibold text-gray-600"
           style={{ display: "table", width: "100%", tableLayout: "fixed" }}>
             <tr>
               <th className="px-6 py-3">#</th>
@@ -122,14 +129,14 @@ export default function LeaderTable() {
                     {medal || index + 1}
                   </td>
                   <td className="px-6 py-4 align-middle text-gray-800">
-                    {leader.full_name}
+                    {leader.full_name || "-"}
                   </td>
                   <td className="px-6 py-4 align-middle">{leader.faculty}</td>
                   <td className="px-6 py-4 align-middle">
-                    {leader.course} / {leader.group}
+                    {leader.course || '-'} / {leader.group || '-'}
                   </td>
                   <td className="px-6 py-4 align-middle text-right font-bold text-blue-600">
-                    {leader.total_score}
+                    {leader.total_score || '0'}
                   </td>
                 </tr>
               );

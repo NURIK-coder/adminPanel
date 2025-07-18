@@ -1,4 +1,4 @@
-const URL = 'http://192.168.2.73:8000/api/'
+const URL = 'https://tanlov.medsfera.uz/api/'
 
 
 const token = localStorage.getItem("token");

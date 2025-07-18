@@ -1,9 +1,9 @@
-const URL = 'http://192.168.2.73:8000/api/admin/'
+const URL = 'https://tanlov.medsfera.uz/api/admin/'
 
 export const userLogin = (userdata) => {
   return async (dispatch) => {
     try {
-      const response = await fetch(URL + 'login/', {
+      const response = await fetch(`${URL}login/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -23,7 +23,7 @@ export const userLogin = (userdata) => {
       localStorage.setItem('token', data.access);
       dispatch({ type: 'SET_USER', payload: data });
 
-      return data; // успешный результат
+      return data; 
     } catch (error) {
       console.error('Login error:', error);
       return Promise.reject(error); // пробросить ошибку в компонент

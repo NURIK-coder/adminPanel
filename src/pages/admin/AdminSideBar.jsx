@@ -1,6 +1,6 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useState } from "react";
 
 export default function AdminSidebar() {
   const [isOpen, setIsOpen] = useState(true);
