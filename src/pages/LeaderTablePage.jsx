@@ -1,10 +1,10 @@
 import AdminLayout from "../components/AdminLayout";
-import LeaderTable from "../components/LeaderTable";
+import TabBar from "../components/TabBar";
 
 export default function LeaderTablePage(){
     return(
         <AdminLayout>
-            <LeaderTable/>
+            <TabBar/>
         </AdminLayout>
     )
 }

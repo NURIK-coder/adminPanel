@@ -43,7 +43,7 @@ export default function Login() {
       <div className="bg-white shadow-xl rounded-xl p-8 w-full max-w-md">
         <div className="text-center mb-6">
           <h2 className="text-xl font-bold text-gray-800">
-            Toshkent davlat tibbiyot akademiyasi
+            Toshkent davlat tibbiyot instituti
           </h2>
         </div>
 

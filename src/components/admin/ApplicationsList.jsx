@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { store } from "../../store/store";
 import { ApplicationDetail, ApplicationList, sendScoreWithAuth } from "../../store/applications/applicationActions";
-import AdminSidebar from "../../pages/admin/AdminSideBar";
 
 export default function ApplicationsList() {
   const applications = useSelector((a) => a.applicationsInfo.applications.results);
@@ -13,42 +12,32 @@ export default function ApplicationsList() {
   const [openCommentFields, setOpenCommentFields] = useState({});
   const [scores, setScores] = useState({});
   const [comments, setComments] = useState({});
-  const [error, setError] = useState(null)
+  const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const modalRef = useRef();
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(true);
   const [errors, setErrors] = useState({});
 
-  console.log(selectedDetail);
-  
-
-  const fetchApplications = async (page = 1) => {
-    await store.dispatch(ApplicationList(page));
-    setLoading(false)
+  const fetchApplications = async (page = 1, name = "") => {
+    await store.dispatch(ApplicationList(page, name));
+    
+    setLoading(false);
   };
 
   useEffect(() => {
-    fetchApplications(currentPage);
-  }, [currentPage]);
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (modalRef.current && !modalRef.current.contains(event.target)) {
-        setIsModalOpen(false);
-      }
-    };
-    if (isModalOpen) document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isModalOpen]);
+    fetchApplications(currentPage, searchTerm);
+  }, [currentPage, searchTerm]);
+
+  
 
   const handleOpenComment = (id) => {
     setOpenCommentFields((prev) => ({
       ...prev,
-      [id]: true
+      [id]: true,
     }));
   };
-
 
   const handleScoreChange = (idx, value) => {
     setScores((prev) => ({ ...prev, [idx]: parseInt(value) }));
@@ -63,60 +52,46 @@ export default function ApplicationsList() {
     const comment = comments[id];
 
     if (score !== undefined) {
-        const scoreData = {
-            item: id,
-            value: score,
-            note: comment || ""
-        };
+      const scoreData = {
+        item: id,
+        value: score,
+        note: comment || "",
+      };
 
-        try {
-            const result = await store.dispatch(sendScoreWithAuth(scoreData));
-            
-            
-            const scoreValue = result; 
+      try {
+        const result = await store.dispatch(sendScoreWithAuth(scoreData));
 
-            const updatedItems = selectedDetail.items.map((item) =>
-              item.id === id ? { ...item, score: scoreValue } : item
-            );
-            console.log(updatedItems);
-            
-            setSelectedDetail((prev) => ({ ...prev, items: updatedItems }));
+        const updatedItems = selectedDetail.items.map((item) =>
+          item.id === id ? { ...item, score: result } : item
+        );
+        setSelectedDetail((prev) => ({ ...prev, items: updatedItems }));
 
-            // Можно также очистить введённые данные
-            setScores((prev) => ({ ...prev, [id]: undefined }));
-            setComments((prev) => ({ ...prev, [id]: "" }));
-            setErrors((prev) => ({ ...prev, [id]: null }));
-            
+        setScores((prev) => ({ ...prev, [id]: undefined }));
+        setComments((prev) => ({ ...prev, [id]: "" }));
+        setErrors((prev) => ({ ...prev, [id]: null }));
+      } catch (error) {
+        setError(error.message);
+        setErrors((prev) => ({ ...prev, [id]: error.message }));
 
-        } catch (error) {
-            setError(error.message)
-            setErrors((prev) => ({ ...prev, [id]: error.message }));
-            
+        setTimeout(() => {
+          setErrors((prev) => {
+            const updated = { ...prev };
+            delete updated[id];
+            return updated;
+          });
+        }, 3000);
+      }
+    }
+  };
 
-            // Удалить полностью через 4 секунды
-            setTimeout(() => {
-              setErrors((prev) => {
-                const updated = { ...prev };
-                delete updated[id];
-                return updated;
-              });
-            }, 3000);
-          }
-        }
-    };
-
-
-  const filteredApps = applications?.filter((app) =>
-    app.student.full_name.toLowerCase().includes(searchTerm.toLowerCase())
-  ).sort((a, b) => new Date(b.submitted_at) - new Date(a.submitted_at));
-
-  const groupedByDay = filteredApps?.reduce((acc, app) => {
+  const groupedByDay = applications?.reduce((acc, app) => {
     const isoDate = new Date(app.submitted_at).toISOString().split("T")[0];
     if (!acc[isoDate]) acc[isoDate] = [];
     acc[isoDate].push(app);
     return acc;
   }, {});
-  if (loading || !applications.length) {
+
+  if (loading) {
     return (
       <div className="min-h-screen flex justify-center items-center">
         <div className="w-16 h-16 border-4 border-blue-500 border-dashed rounded-full animate-spin" />
@@ -124,26 +99,36 @@ export default function ApplicationsList() {
     );
   }
 
+ 
+
   const totalPages = Math.ceil((paginationInfo?.count || 1) / 10);
 
   return (
-    
     <div className="bg-gray-50 min-h-screen mx-10">
-     
-      
       <div className="p-6">
         <div className="flex justify-between items-center mb-2">
           <h2 className="text-2xl font-semibold">Arizalar</h2>
-          <input
-            type="text"
-            placeholder="Ism bo‘yicha qidirish..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="border px-3 py-2 rounded shadow-sm focus:outline-none w-64"
-          />
+          <form
+              onSubmit={(e) => {
+                e.preventDefault(); 
+                setCurrentPage(1);
+                fetchApplications(1, searchTerm); // запустить поиск по имени
+              }}
+            >
+              <input
+                type="text"
+                placeholder="Ism bo‘yicha qidirish..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="border px-3 py-2 rounded shadow-sm focus:outline-none w-64"
+              />
+              
+          </form>
+          
+
         </div>
 
-        {groupedByDay && Object.entries(groupedByDay).length > 0 ? (
+        {groupedByDay && Object.entries(groupedByDay).length > 0  ? (
           Object.entries(groupedByDay).map(([dayKey, apps]) => (
             <div key={dayKey} className="mb-2 ml-3 text-left">
               <h3 className="text-xl font-semibold   border-b pb-1">{dayKey}</h3>
@@ -173,8 +158,8 @@ export default function ApplicationsList() {
                                 </span>
                             )}
                             {app.status === "pending" && (
-                                <div className="flex items-center gap-2">
-                                <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm">
+                              <div className="flex items-center gap-2">
+                                <span className="bg-blue-600 text-white text-center shadow-md shadow-black/20 px-3 py-1 rounded-full text-sm">
                                     Ko‘rib chiqilmoqda
                                 </span>
                                 <button
@@ -194,7 +179,7 @@ export default function ApplicationsList() {
                                 >
                                     Baholash {expandedAppId === app.id ? (<span>▼</span>) : '▶'}
                                 </button>
-                                </div>
+                              </div>
                             )}
                             {app.status !== "pending" && app.status !== "accepted" && (
                                 <span className="bg-gray-200 text-gray-600 px-3 py-1 rounded-full text-sm">

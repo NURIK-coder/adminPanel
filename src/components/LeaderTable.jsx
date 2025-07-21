@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { store } from "../store/store";
 import { LeaderList } from "../store/applications/applicationActions";
+import TabBar from "./TabBar";
 
 export default function LeaderTable() {
   const leaders = useSelector((state) => state.applicationsInfo.leaders || []);
@@ -50,6 +51,7 @@ export default function LeaderTable() {
 
   return (
     <div className="p-8 bg-gray-100 min-h-screen">
+      
       <h1 className="text-3xl font-bold mb-6 text-gray-800">
         🏆 Umumiy ball bo‘yicha liderlar
       </h1>
@@ -91,7 +93,7 @@ export default function LeaderTable() {
         </select>
       </div>
 
-      <div className="overflow-x-auto bg-white rounded-xl shadow-lg">
+      <div className="overflow-x-auto bg-white  rounded-xl shadow-lg">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-blue-500 text-white text-center text-sm font-semibold text-gray-600"
           style={{ display: "table", width: "100%", tableLayout: "fixed" }}>

@@ -60,10 +60,10 @@ export const loginAndSaveToken = async () => {
 
 
 
-export const ApplicationList = (page = 1) => {
+export const ApplicationList = (page = 1, name='') => {
     return async (dispatch) => {
         const request = () =>
-            fetch(`${URL}admin/applications/?page=${page}`, {
+            fetch(`${URL}admin/applications/?page=${page}&student=${name}`, {
                 method: "GET",
                 headers: {
                     "Authorization": `Bearer ${localStorage.getItem('token')}`,
@@ -209,6 +209,41 @@ export const LeaderList = () => {
         if (res.ok) {
             const data = await res.json();
             dispatch({ type: 'SET_LEADERS', payload: data });
+            return { payload: data }
+        }
+    };
+};  
+
+
+export const getGpaLeaders = ( page=1, itemsPerPage=50) => {
+    return async (dispatch) => {
+        const request = () =>
+            fetch(URL + `admin/students-gpa/?page=${page}&page_size=${itemsPerPage}`, {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${localStorage.getItem('token')}`,
+                }
+            });
+
+        let res = await request();
+
+        if (res.status === 401) {
+            const refreshed = await refreshToken();
+            if (!refreshed) {
+                await loginAndSaveToken();
+                res = await request();
+            }
+
+        }
+
+        if (res.status === 403) {
+            const error = await res.json();
+            return error.detail || "Xatolik yuz berdi.";
+        }
+
+        if (res.ok) {
+            const data = await res.json();
+            dispatch({ type: 'SET_GPA_LEADERS', payload: data });
             return { payload: data }
         }
     };
