@@ -1,9 +1,42 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { store } from "../../store/store";
+import { CurrentUser } from "../../store/user/userActions";
 
 export default function AdminSidebar() {
   const [isOpen, setIsOpen] = useState(true);
+  const user = useSelector((state) => state.userInfo.user);
+  const navigate = useNavigate();
+
+  const routes = [
+    "/admin/dashboard",
+    "/admin/profile",
+    ...(user.role !== "kichik_admin" ? ["/admin/applications"] : []),
+    "/admin/leader/table",
+  ];
+  
+  useEffect(() => {
+    store.dispatch(CurrentUser())
+    const handleKeyDown = (e) => {
+      if (e.ctrlKey && (e.key === "ArrowRight" || e.key === "ArrowLeft")) {
+        const currentPath = window.location.pathname;
+        const index = routes.indexOf(currentPath);
+
+        if (e.key === "ArrowRight" && index < routes.length - 1) {
+          navigate(routes[index + 1]);
+        }
+
+        if (e.key === "ArrowLeft" && index > 0) {
+          navigate(routes[index - 1]);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   return (
     <motion.div
@@ -30,11 +63,16 @@ export default function AdminSidebar() {
                   👥 {isOpen && "Profil"}
                 </Link>
               </li>
-              <li className="hover:bg-gray-200 p-3 rounded-xl">
-                <Link to="/admin/applications" className="flex items-center gap-2 text-gray-700 hover:text-blue-600">
-                  📄 {isOpen && "Arizalar"}
-                </Link>
-              </li>
+              
+                {user.role != 'kichik_admin' ? (
+                  <li className="hover:bg-gray-200 p-3 rounded-xl">
+                    <Link to="/admin/applications" className="flex items-center gap-2 text-gray-700 hover:text-blue-600">
+                      📄 {isOpen && "Arizalar"}
+                    </Link>
+                  </li>) 
+                : null}
+                
+              
               <li className="hover:bg-gray-200 p-3 rounded-xl text-left text-[13px]">
                 <Link to="/admin/leader/table" className="flex items-center gap-2 text-gray-700 hover:text-blue-600">
                   🏆 {isOpen && "Ariza bahosi bo'yicha liderlar"}

@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { GetExel, getGpaLeaders } from "../store/applications/applicationActions";
+import { GetExel, getGpaLeaders, getMandad } from "../store/applications/applicationActions";
 import { store } from "../store/store";
 import { useDispatch, useSelector } from "react-redux";
 import { Pagination } from "./pogintion";
 import { fetchAllFiltres } from "../store/filtres/filterActions";
 
-export default function GpaLeaders() {
+export default function Mandad() {
   const itemsPerPage = 100;
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null);
@@ -38,17 +38,14 @@ export default function GpaLeaders() {
   
   useEffect(() => {
     setLoading(true);
-    dispatch(getGpaLeaders({
-      university1,
-      level,
-      faculty,
+    dispatch(getMandad({
+     
       page: currentPage,
-      itemsPerPage,
-      full_name: searchName
+    itemsPerPage,
     })).then(() => {
       setLoading(false);
     });
-  }, [currentPage, university1, level, faculty, searchName]);
+  }, [currentPage]);
   useEffect(() => {
   if (!loading && results.length === 0) {
     const timeout = setTimeout(() => {
@@ -64,13 +61,13 @@ export default function GpaLeaders() {
     setSearchName(name);
     setCurrentPage(1);
     setLoading(true);
-    dispatch(getGpaLeaders({
-      university1,
-      level,
-      faculty,
-      page: 1,
+    dispatch(getMandad({
+    //   university1,
+    //   level,
+    //   faculty,
+      page: currentPage,
       itemsPerPage,
-      full_name: name
+    //   full_name: searchName
     })).then(() => {
       setLoading(false);
     });
@@ -156,7 +153,7 @@ const filteredResults = results
 
   return (
     <div className="min-w-screen-lg mx-auto p-4">
-      <h2 className="text-2xl font-bold mb-4">🎓 GPA Leaderboard</h2>
+      <h2 className="text-2xl font-bold mb-4">🎓Mandad</h2>
 
       {/* Фильтры */}
       <div className="flex flex-wrap gap-4 mb-6 justify-end">
@@ -273,18 +270,21 @@ const filteredResults = results
                   <td className="py-2 px-4">
                     {medal ? `${medal}` : globalIndex + 1}
                   </td>
-                  <td className="py-2 px-4 flex justify-center items-center gap-2">
-                    <img
-                      src={
-                        student.image && student.image.trim()
-                          ? student.image
-                          : "https://img.freepik.com/premium-psd/contact-icon-illustration-isolated_23-2151903357.jpg?semt=ais_hybrid&w=740"
-                      }
-                      className="w-10 h-10 rounded-full object-cover"
-                    />
-                    <span className="text-center w-[200px]">
-                      {student.full_name}
-                    </span>
+                  <td className="py-2 px-4 ">
+                    <div className="flex justify-center items-center gap-2">
+                        <img
+                        src={
+                            student.image && student.image.trim()
+                            ? student.image
+                            : "https://img.freepik.com/premium-psd/contact-icon-illustration-isolated_23-2151903357.jpg?semt=ais_hybrid&w=740"
+                        }
+                        className="w-10 h-10 rounded-full object-cover"
+                        />
+                        <span className="text-center w-[200px]">
+                        {student.full_name}
+                        </span>
+                    </div>
+                    
                   </td>
                   <td className="py-2 px-4 font-semibold">
                     {student.gpa_records?.[0]?.gpa || "0.00"}
@@ -300,8 +300,8 @@ const filteredResults = results
                       )}
                     </div>
                   </td>
-                  <td className="py-2 px-4 w-40 ">{student.level?.name} / {student.group}</td>
-                  <td className="py-2 px-4">{student.faculty?.name}</td>
+                  <td className="py-2 px-4 w-40 ">{student.course} / {student.group}</td>
+                  <td className="py-2 px-4">{student.faculty}</td>
                 </tr>
               );
             })}

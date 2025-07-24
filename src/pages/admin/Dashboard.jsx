@@ -35,7 +35,7 @@ export default function Dashboard() {
     );
   }
 
-  const topAppType = data.application_types.reduce((a, b) =>
+  const topAppType = data.application_types?.reduce((a, b) =>
     a.count > b.count ? a : b
   );
 

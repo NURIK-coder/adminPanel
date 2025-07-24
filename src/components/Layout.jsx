@@ -6,6 +6,7 @@ import ProfilePage from "../pages/ProfilePage";
 import DashboardPage from "../pages/DashboardPage";
 import ScreenSizeGuard from "./ScreenSize";
 import LeaderTablePage from "../pages/LeaderTablePage";
+import MandadPage from "../pages/MandadPage";
 
 function Layout(){
     return (
@@ -45,6 +46,14 @@ function Layout(){
                     element={
                         <ScreenSizeGuard>
                             <LeaderTablePage />
+                        </ScreenSizeGuard>
+                    }
+                />
+                <Route
+                    path="/admin/mandad"
+                    element={
+                        <ScreenSizeGuard>
+                            <MandadPage />
                         </ScreenSizeGuard>
                     }
                 />

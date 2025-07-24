@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { store } from "../store/store"
 import { userLogin } from "../store/user/auth"
 import { EyeIcon, EyeOffIcon } from "lucide-react"
@@ -10,6 +10,8 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState("")
   const navigate = useNavigate()
+
+  
 
   const handleLogin = async (e) => {
     e.preventDefault() // важно: предотвратить стандартную отправку формы
@@ -43,7 +45,7 @@ export default function Login() {
       <div className="bg-white shadow-xl rounded-xl p-8 w-full max-w-md">
         <div className="text-center mb-6">
           <h2 className="text-xl font-bold text-gray-800">
-            Toshkent davlat tibbiyot instituti
+            Toshkent davlat tibbiyot universiteti
           </h2>
         </div>
 

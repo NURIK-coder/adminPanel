@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { store } from "../../store/store";
-import { ApplicationDetail, ApplicationList, sendScoreWithAuth } from "../../store/applications/applicationActions";
+import { ApplicationDetail, ApplicationList, GetExel, sendScoreWithAuth } from "../../store/applications/applicationActions";
+import { CurrentUser } from "../../store/user/userActions";
 
 export default function ApplicationsList() {
   const applications = useSelector((a) => a.applicationsInfo.applications.results);
@@ -18,6 +19,14 @@ export default function ApplicationsList() {
   const modalRef = useRef();
   const [loading, setLoading] = useState(true);
   const [errors, setErrors] = useState({});
+  const user = useSelector((state) => state.userInfo.user);
+  
+  useEffect(() => {
+    store.dispatch(CurrentUser())
+  }, []);
+
+  
+  
 
   const fetchApplications = async (page = 1, name = "") => {
     await store.dispatch(ApplicationList(page, name));
@@ -98,6 +107,16 @@ export default function ApplicationsList() {
       </div>
     );
   }
+  if (user.role == 'kichik_admin') {
+    return (
+      <div className="flex-1 justify-center items-center">
+        <h1 className="font-bold text-xl text-red">Sizga bu sahifaga ruxsat yo'q</h1>
+      </div>
+    )
+  }
+
+  
+
 
  
 
@@ -108,6 +127,7 @@ export default function ApplicationsList() {
       <div className="p-6">
         <div className="flex justify-between items-center mb-2">
           <h2 className="text-2xl font-semibold">Arizalar</h2>
+          
           <form
               onSubmit={(e) => {
                 e.preventDefault(); 
@@ -140,7 +160,7 @@ export default function ApplicationsList() {
                         src="https://img.freepik.com/premium-psd/contact-icon-illustration-isolated_23-2151903357.jpg?semt=ais_hybrid&w=740"
                         className="w-[50px] rounded-full shadow-xl border-[1px]"/>
                         <div className="text-center mx-3 ">
-                          <p className="mx-2 text-[15px]">GPA: {app.student.gpa_records[0].gpa}</p>
+                          <p className="mx-2 text-[15px]">GPA: {app.student.gpa_records[0]?.gpa ?? "N/A"}</p>
                           <h4 className="font-bold text-green-600">JAMI: <span className="text-gray-700 ">{app.total_score}</span></h4>
                         </div>
                         

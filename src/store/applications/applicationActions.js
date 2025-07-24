@@ -180,10 +180,10 @@ export const sendScoreWithAuth = (data) => async (dispatch, getState) => {
     return await response.json();
 };
 
-export const LeaderList = () => {
+export const LeaderList = ({page = 1, itemsPerPage=100, full_name='', faculty='', course='', university='', toifa=''}) => {
     return async (dispatch) => {
         const request = () =>
-            fetch(URL + `admin/leaderboard/`, {
+            fetch(URL + `admin/leaderboard/?page=${page}&page_size=${itemsPerPage}&full_name=${full_name}&faculty=${faculty}&course=${course}&univeresity=${university}&toifa=${toifa}`, {
                 method: "GET",
                 headers: {
                     "Authorization": `Bearer ${localStorage.getItem('token')}`,
@@ -215,36 +215,155 @@ export const LeaderList = () => {
 };  
 
 
-export const getGpaLeaders = ( page=1, itemsPerPage=50) => {
-    return async (dispatch) => {
-        const request = () =>
-            fetch(URL + `admin/students-gpa/?page=${page}&page_size=${itemsPerPage}`, {
-                method: "GET",
-                headers: {
-                    "Authorization": `Bearer ${localStorage.getItem('token')}`,
-                }
-            });
-
-        let res = await request();
-
-        if (res.status === 401) {
-            const refreshed = await refreshToken();
-            if (!refreshed) {
-                await loginAndSaveToken();
-                res = await request();
-            }
-
+export const getGpaLeaders = ({
+  university1 = "",
+  level = "",
+  faculty = "",
+  page = 1,
+  itemsPerPage = 20,
+  full_name = ""
+}) => {
+  return async (dispatch) => {
+    const request = () =>
+      fetch(
+        `${URL}admin/students-gpa/?page=${page}&page_size=${itemsPerPage}&faculty=${faculty}&university=${university1}&level=${level}&full_name=${full_name}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         }
+      );
 
-        if (res.status === 403) {
-            const error = await res.json();
-            return error.detail || "Xatolik yuz berdi.";
-        }
+    let res = await request();
 
-        if (res.ok) {
-            const data = await res.json();
-            dispatch({ type: 'SET_GPA_LEADERS', payload: data });
-            return { payload: data }
+    if (res.status === 401) {
+      const refreshed = await refreshToken();
+      if (!refreshed) {
+        await loginAndSaveToken();
+        res = await request();
+      }
+    }
+
+    if (res.status === 403) {
+      const error = await res.json();
+      return error.detail || "Xatolik yuz berdi.";
+    }
+
+    if (res.ok) {
+      const data = await res.json();
+      dispatch({ type: "SET_GPA_LEADERS", payload: data });
+      return { payload: data };
+    }
+  };
+};
+
+
+export const GetExel = () => {
+  return async () => {
+    const request = () =>
+      fetch(URL + `admin/students-gpa/export`, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${localStorage.getItem('token')}`,
         }
-    };
-};  
+      });
+
+    let res = await request();
+
+    if (res.status === 401) {
+      const refreshed = await refreshToken();
+      if (!refreshed) {
+        await loginAndSaveToken();
+        res = await request();
+      }
+    }
+
+    if (res.status === 403) {
+      const error = await res.json();
+      throw new Error(error.detail || "Xatolik yuz berdi.");
+    }
+
+    if (res.ok) {
+      const blob = await res.blob();
+      return { payload: blob };
+    }
+
+    throw new Error("Yuklab olishda xatolik yuz berdi.");
+  };
+};
+
+export const GetExelLeaderBoard = () => {
+  return async () => {
+    const request = () =>
+      fetch(URL + `api/leaderboard/?export=excel`, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${localStorage.getItem('token')}`,
+        }
+      });
+
+    let res = await request();
+
+    if (res.status === 401) {
+      const refreshed = await refreshToken();
+      if (!refreshed) {
+        await loginAndSaveToken();
+        res = await request();
+      }
+    }
+
+    if (res.status === 403) {
+      const error = await res.json();
+      throw new Error(error.detail || "Xatolik yuz berdi.");
+    }
+
+    if (res.ok) {
+      const blob = await res.blob();
+      return { payload: blob };
+    }
+
+    throw new Error("Yuklab olishda xatolik yuz berdi.");
+  };
+};
+
+
+
+export const getMandad = ({
+  page = 1,
+  itemsPerPage = 100,
+}) => {
+  return async (dispatch) => {
+    const request = () =>
+      fetch(
+        `${URL}admin/mandat/?page=${page}&page_size=${itemsPerPage}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+    let res = await request();
+
+    if (res.status === 401) {
+      const refreshed = await refreshToken();
+      if (!refreshed) {
+        await loginAndSaveToken();
+        res = await request();
+      }
+    }
+
+    if (res.status === 403) {
+      const error = await res.json();
+      return error.detail || "Xatolik yuz berdi.";
+    }
+
+    if (res.ok) {
+      const data = await res.json();
+      dispatch({ type: "SET_GPA_LEADERS", payload: data });
+      return { payload: data };
+    }
+  };
+};

@@ -1,17 +1,32 @@
 import { useEffect, useState } from "react";
 import LeaderTable from "./LeaderTable";
 import GpaLeaders from "./GpaLeaders";
+import { CurrentUser } from "../store/user/userActions";
+import { store } from "../store/store";
+import { useSelector } from "react-redux";
+import Mandad from "./Mandad";
 
 
 export default function TabBar() {
-  const [activeTab, setActiveTab] = useState("faollik_indexi");
-
+  const user = useSelector((state) => state.userInfo.user);
+  const [activeTab, setActiveTab] = useState(user.role !== 'dekan' && user.role !== 'kichik_admin' ? "faollik_indexi" : "gpa");
+  
   
 
-  const tabs = [
-    { id: "faollik_indexi", label: "Ijtimoi faollik indexi" },
-    { id: "gpa", label: "GPA bo'yicha" },
+  const tabs = [,
+    ...( user.role !== 'kichik_admin'
+    ? [{ id: "faollik_indexi", label: "Ijtimoi faollik indexi" }]
+    : []),
+    ...(user.role === 'dekan' || user.role === 'kichik_admin'
+    ? [{ id: "gpa", label: "GPA bo'yicha" }]
+    : []),
+    ...(user.role === 'dekan' || user.role === 'kichik_admin'
+    ? [{ id: "mandad", label: "Mandad" }]
+    : []),
   ];
+  useEffect(() => {
+    store.dispatch(CurrentUser())
+  }, []);
 
   return (
     <div className="w-full">
@@ -21,7 +36,7 @@ export default function TabBar() {
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`py-2 px-4 font-medium text-sm transition-all duration-200 ${
-              activeTab === tab.id
+              activeTab === tab?.id
                 ? "border-b-2 border-blue-600 text-blue-600"
                 : "text-gray-500 hover:text-blue-500"
             }`}
@@ -31,11 +46,13 @@ export default function TabBar() {
         ))}
       </div>
 
-      {activeTab === "faollik_indexi" ? (
+      {activeTab === "faollik_indexi" &&  user.role !== 'dekan' && user.role !== 'kichik_admin'? (
         <LeaderTable />
-      ) :  (
+      ) : (activeTab === "faollik_indexi" && user.role === 'dekan' || user.role === 'kichik_admin') ? (
         <GpaLeaders  />
-      ) }
+      ): (user.role === 'dekan' || user.role === 'kichik_admin') ?(
+        <Mandad/>
+      ) : null}
     </div>
   );
 }
