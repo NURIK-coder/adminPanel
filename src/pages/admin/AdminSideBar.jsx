@@ -65,11 +65,19 @@ export default function AdminSidebar() {
               </li>
               
                 {user.role != 'kichik_admin' ? (
-                  <li className="hover:bg-gray-200 p-3 rounded-xl">
-                    <Link to="/admin/applications" className="flex items-center gap-2 text-gray-700 hover:text-blue-600">
-                      📄 {isOpen && "Arizalar"}
-                    </Link>
-                  </li>) 
+                  <div>
+                    <li className="hover:bg-gray-200 p-3 rounded-xl">
+                      <Link to="/admin/applications" className="flex items-center gap-2 text-gray-700 hover:text-blue-600">
+                        📄 {isOpen && "Arizalar"}
+                      </Link>
+                    </li>
+                    <li className="hover:bg-gray-200 p-3 rounded-xl">
+                      <Link to="/admin/scored-applications" className="flex items-center gap-2 text-gray-700 hover:text-blue-600">
+                        ✅ {isOpen && "Bholangan arizalar"}
+                      </Link>
+                    </li>
+                  </div>
+                  ) 
                 : null}
                 
               

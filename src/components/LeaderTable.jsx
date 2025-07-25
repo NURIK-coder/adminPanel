@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { store } from "../store/store";
 import { GetExelLeaderBoard, LeaderList } from "../store/applications/applicationActions";
@@ -23,13 +23,23 @@ export default function LeaderTable() {
   const faculties = useSelector((state) => state.filterInfo.faculties.facultys || []);
   const courses = useSelector((state) => state.filterInfo.levels.levels || []);
   const universities = useSelector((state) => state.filterInfo.universities.universitys || []);
-  // console.log("Faculties:", faculties, "Courses:", courses, "Universities:", universities);
-  const state = useSelector((state) => state.filterInfo);
+  const debounceTimeout = useRef(null);
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
   
 
   useEffect(() => {
     store.dispatch(fetchAllFiltres())
   }, [])
+  useEffect(() => {
+    if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
+
+    debounceTimeout.current = setTimeout(() => {
+      setDebouncedSearch(searchName);
+    }, 500); // 500ms задержка
+
+    return () => clearTimeout(debounceTimeout.current);
+  }, [searchName]);
 
   useEffect(() => {
     setLoading(true);
@@ -37,14 +47,14 @@ export default function LeaderTable() {
       LeaderList({
         page: currentPage,
         itemsPerPage,
-        full_name: searchName,
+        full_name: debouncedSearch,
         faculty: selectedFaculty,
         course: selectedCourse,
         university,
         toifa,
       })
     ).then(() => setLoading(false));
-  }, [currentPage, searchName, selectedFaculty, selectedCourse, university, toifa]);
+  }, [currentPage, debouncedSearch, selectedFaculty, selectedCourse, university, toifa]);
 
   
 
@@ -55,13 +65,7 @@ export default function LeaderTable() {
     return null;
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex justify-center items-center">
-        <div className="w-16 h-16 border-4 border-blue-500 border-dashed rounded-full animate-spin" />
-      </div>
-    );
-  }
+  
 
   const handleDownloadExcel = async () => {
         try {
@@ -144,39 +148,33 @@ export default function LeaderTable() {
           ))}
         </select>
 
-        <select
-          value={toifa}
-          onChange={(e) => {
-            setToifa(e.target.value);
-            setCurrentPage(1);
-          }}
-          className="px-4 py-2 rounded border w-[200px]"
-        >
-          <option value="">Barcha toifalar</option>
-          <option value="true">Toifaga ega</option>
-          <option value="false">Toifasiz</option>
-        </select>
+        
         <button className="p-2 rounded-md bg-green-500 shadow-xl flex gap-2 items-center hover:bg-green-600 " >{error || "Yuklab o'lish"} <img 
         className="w-5 h-5"
         src="https://img.icons8.com/?size=100&id=83159&format=png&color=000000" alt="" /></button>
       </div>
 
       <div className="overflow-x-auto bg-white rounded-xl shadow-lg max-h-[600px] overflow-y-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-blue-500 text-white text-center text-sm font-semibold">
-            <tr>
-              <th className="px-6 py-3">#</th>
-              <th className="px-6 py-3">Talaba</th>
-              <th className="px-6 py-3">Fakultet</th>
-              <th className="px-6 py-3">Kurs / Guruh</th>
-              <th className="px-6 py-3">Ijtimoyi Toifa reestri</th>
-              <th className="px-6 py-3">Ball</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {[...results]
-              .sort((a, b) => b.total_score - a.total_score)
-              .map((leader, index) => {
+        
+
+<div className="overflow-x-auto bg-white rounded-xl shadow-lg max-h-[600px] overflow-y-auto">
+  {loading ? (
+    <div className="flex justify-center items-center py-10">
+      <div className="w-10 h-10 border-4 border-blue-500 border-dashed rounded-full animate-spin" />
+    </div>
+        ) : (
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-blue-500 text-white text-center text-sm font-semibold">
+              <tr>
+                <th className="px-6 py-3">#</th>
+                <th className="px-6 py-3">Talaba</th>
+                <th className="px-6 py-3">Fakultet</th>
+                <th className="px-6 py-3">Kurs / Guruh</th>
+                <th className="px-6 py-3">Ball</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {results.map((leader, index) => {
                 const globalIndex = (currentPage - 1) * itemsPerPage + index;
                 const medal = getMedal(globalIndex);
 
@@ -186,22 +184,17 @@ export default function LeaderTable() {
                     <td className="px-6 py-4">{leader.full_name || '-'}</td>
                     <td className="px-6 py-4">{leader.faculty || '-'}</td>
                     <td className="px-6 py-4">{leader.course || '-'} / {leader.group || '-'}</td>
-                    <td className="px-6 py-4 text-center">
-                      {leader.toifa === true ? (
-                        <span className="px-2 py-1 rounded bg-green-500 text-white">Ha</span>
-                      ) : (leader.toifa === false)? (
-                        <span className="px-2 py-1 rounded bg-red-500 text-white">Yoq</span>
-                      ): '-'}
-                    </td>
                     <td className="px-6 py-4 text-right font-bold text-blue-600">
                       {leader.total_score || '0'}
                     </td>
                   </tr>
                 );
-            })}
+              })}
+            </tbody>
+          </table>
+        )}
+      </div>
 
-          </tbody>
-        </table>
       </div>
 
       <Pagination

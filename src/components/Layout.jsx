@@ -7,6 +7,7 @@ import DashboardPage from "../pages/DashboardPage";
 import ScreenSizeGuard from "./ScreenSize";
 import LeaderTablePage from "../pages/LeaderTablePage";
 import MandadPage from "../pages/MandadPage";
+import ScoredApplicationsPage from "../pages/ScoredApplicationsPage";
 
 function Layout(){
     return (
@@ -54,6 +55,14 @@ function Layout(){
                     element={
                         <ScreenSizeGuard>
                             <MandadPage />
+                        </ScreenSizeGuard>
+                    }
+                />
+                <Route
+                    path="/admin/scored-applications"
+                    element={
+                        <ScreenSizeGuard>
+                            <ScoredApplicationsPage />
                         </ScreenSizeGuard>
                     }
                 />

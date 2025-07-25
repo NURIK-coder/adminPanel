@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import { store } from "../../store/store";
-import { ApplicationDetail, ApplicationList, GetExel, sendScoreWithAuth } from "../../store/applications/applicationActions";
-import { CurrentUser } from "../../store/user/userActions";
+import { store } from "../store/store";
+import { ApplicationDetail, ApplicationList, GetExel, sendScoreWithAuth } from "../store/applications/applicationActions";
+import { CurrentUser } from "../store/user/userActions";
 
-export default function ApplicationsList() {
+export default function ScoredApplications() {
   const applications = useSelector((a) => a.applicationsInfo.applications.results);
   const paginationInfo = useSelector((a) => a.applicationsInfo.applications);
   const [searchTerm, setSearchTerm] = useState("");
@@ -15,8 +15,6 @@ export default function ApplicationsList() {
   const [comments, setComments] = useState({});
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const modalRef = useRef();
   const [loading, setLoading] = useState(true);
   const [errors, setErrors] = useState({});
   const user = useSelector((state) => state.userInfo.user);
@@ -95,13 +93,13 @@ export default function ApplicationsList() {
 
   const filteredApplications = applications
     ?.map(app => {
-      const falseItems = app.items?.filter(item => item.status === false);
-      console.log("app id:", app.id, "falseItems:", falseItems);
-      if (falseItems.length === 0) return null; // Удаляем заявку, если нет false-направлений
+      const trueItems = app.items?.filter(item => item.status === true);
+      console.log("app id:", app.id, "trueItems:", trueItems);
+      if (trueItems.length === 0) return null; // Удаляем заявку, если нет false-направлений
 
       return {
         ...app,
-        items: falseItems, // Оставляем только те items, у которых status === false
+        items: trueItems, // Оставляем только те items, у которых status === false
       };
     })
     .filter(app => app !== null); // Убираем заявки без подходящих items
@@ -141,7 +139,7 @@ export default function ApplicationsList() {
     <div className="bg-gray-50 min-h-screen mx-10">
       <div className="p-6">
         <div className="flex justify-between items-center mb-2">
-          <h2 className="text-2xl font-semibold">Arizalar</h2>
+          <h2 className="text-2xl font-semibold">Baholangan Arizalar</h2>
           
           <form
               onSubmit={(e) => {
@@ -171,24 +169,13 @@ export default function ApplicationsList() {
                 {apps.map((app) => (
                   <div key={app.id} className="bg-white rounded-xl shadow p-4 hover:shadow-md transition">
                     <div className="flex items-center justify-between">
-                        
-                        <div>
-                          
-                          <div className="text-center flex gap-2">
-                            <img 
-                              src="https://img.freepik.com/premium-psd/contact-icon-illustration-isolated_23-2151903357.jpg?semt=ais_hybrid&w=740"
-                              className="w-[50px] rounded-full shadow-xl border-[1px]"/>
-                              <div>
-                                <p className="mx-2 text-[15px]">GPA: {app.student.gpa_records[0]?.gpa ?? "N/A"}</p>
-                                <h4 className="font-bold text-green-600">JAMI: <span className="text-gray-700 ">{app.total_score}</span></h4>
-                              </div>
-                          </div>
-                          <div className="flex m-2 gap-2 items-center">
-                            <p className="font-bold">Grand turi: </p>{app.application_type_name}
-                          </div>
+                        <img 
+                        src="https://img.freepik.com/premium-psd/contact-icon-illustration-isolated_23-2151903357.jpg?semt=ais_hybrid&w=740"
+                        className="w-[50px] rounded-full shadow-xl border-[1px]"/>
+                        <div className="text-center mx-3 ">
+                          <p className="mx-2 text-[15px]">GPA: {app.student.gpa_records[0]?.gpa ?? "N/A"}</p>
+                          <h4 className="font-bold text-green-600">JAMI: <span className="text-gray-700 ">{app.total_score}</span></h4>
                         </div>
-                        
-                        
                         
 
                       <div className="mx-auto text-center">
@@ -213,7 +200,7 @@ export default function ApplicationsList() {
                                     if (expandedAppId !== app.id) {
                                         const res = await store.dispatch(ApplicationDetail(app.id));
                                         if (res?.payload) {
-                                            const filteredItems = res.payload.items?.filter(item => item.status === false);
+                                            const filteredItems = res.payload.items?.filter(item => item.status === true);
                                             
                                             if (filteredItems.length === 0) {
                                               // ничего не отображаем, если нет false-статусов
@@ -288,19 +275,11 @@ export default function ApplicationsList() {
                                     <div>
                                       <p>
                                         📊 <span className="font-medium text-gray-800">Test natijasi: </span>
-                                        {app?.test_result?.score != null ? `${app.test_result.score}%` : "Noma’lum"}
+                                        {item.test_result != null ? `${item.test_result}%` : "Noma’lum"}
                                       </p>
                                       <p>
-                                        🧮 <span className="font-medium text-gray-800">Savollar so'ni:</span>{" "}
-                                        {app.test_result?.total ?? "0"} ta
-                                      </p>
-                                      <p>
-                                        ✅ <span className="font-medium text-gray-800">Togri javoblar so'ni:</span>{" "}
-                                        {app.test_result?.correct ?? "0"} 
-                                      </p>
-                                      <p>
-                                        ✍️ <span className="font-medium text-gray-800">Ball:</span>{" "}
-                                        {app.test_result?.ball ?? "0"} 
+                                        🧮 <span className="font-medium text-gray-800">Test ball:</span>{" "}
+                                        {item.test_ball ?? "0"}
                                       </p>
                                     </div>
                                     
@@ -308,24 +287,10 @@ export default function ApplicationsList() {
                                   
                                   
                                   {item.direction_name != "Kitobxonlik madaniyati" && (
-                                     <div>
-                                      <p>
-                                        📊 <span className="font-medium text-gray-800">Test natijasi: </span>
-                                        {app?.test_result?.score != null ? `${app.test_result.score}%` : "Noma’lum"}
-                                      </p>
-                                      <p>
-                                        🧮 <span className="font-medium text-gray-800">Savollar so'ni:</span>{" "}
-                                        {app.test_result?.total ?? "0"} ta
-                                      </p>
-                                      <p>
-                                        ✅ <span className="font-medium text-gray-800">Togri javoblar so'ni:</span>{" "}
-                                        {app.test_result?.correct ?? "0"} 
-                                      </p>
-                                      <p>
-                                        ✍️ <span className="font-medium text-gray-800">Ball:</span>{" "}
-                                        {app.test_result?.ball ?? "0"} 
-                                      </p>
-                                    </div>
+                                     <p>
+                                      🎓 <span className="font-medium text-gray-800">GPA (ball):</span>{" "}
+                                      {item?.gpa_ball ?? "0"}
+                                    </p>
                                   )}
                                  
                                 </div>
