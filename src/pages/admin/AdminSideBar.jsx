@@ -73,7 +73,7 @@ export default function AdminSidebar() {
                     </li>
                     <li className="hover:bg-gray-200 p-3 rounded-xl">
                       <Link to="/admin/scored-applications" className="flex items-center gap-2 text-gray-700 hover:text-blue-600">
-                        ✅ {isOpen && "Bholangan arizalar"}
+                        ✅ {isOpen && "Bаholangan arizalar"}
                       </Link>
                     </li>
                   </div>
