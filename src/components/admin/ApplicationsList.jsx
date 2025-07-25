@@ -130,14 +130,41 @@ export default function ApplicationsList() {
     )
   }
 
-  const handleDownload = (url) => {
-    const link = document.createElement("a");
-    link.href = url;
-    link.target = "_blank"; // открытие в новой вкладке
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
+  async function handleDownload(url) {
+    const slicedUrl = url.replace('http://tanlov.medsfera.uz/media/', '');
+    try {
+      const response = await fetch(`https://tanlov.medsfera.uz/api/download/${slicedUrl}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Download failed');
+      }
+
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+
+      // Fayl nomini URL ichidan olish (ixtiyoriy)
+      const fileName = url.split('/').pop() || 'fayl';
+      link.download = fileName;
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // URLni tozalash
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      console.error('Download error:', error);
+      alert('Faylni yuklab bo‘lmadi.');
+    }
+}
 
 
   
