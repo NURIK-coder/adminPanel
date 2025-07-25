@@ -133,7 +133,7 @@ export default function ApplicationsList() {
   const handleDownload = (url) => {
     const link = document.createElement("a");
     link.href = url;
-    link.download = "ariza.pdf"; // bu faylga brauzerda beriladigan nom
+    link.target = "_blank"; // открытие в новой вкладке
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
