@@ -362,7 +362,7 @@ export const getMandad = ({
 
     if (res.ok) {
       const data = await res.json();
-      dispatch({ type: "SET_GPA_LEADERS", payload: data });
+      dispatch({ type: "SET_MANDAD", payload: data });
       return { payload: data };
     }
   };

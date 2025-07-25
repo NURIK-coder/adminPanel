@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react"
 import { store } from "../store/store"
 import { userLogin } from "../store/user/auth"
-import { EyeIcon, EyeOffIcon } from "lucide-react"
 import { useNavigate } from "react-router-dom"
+import { EyeIcon, EyeOffIcon } from "lucide-react"
 
 export default function Login() {
   const [username, setUsername] = useState("")
@@ -86,7 +86,7 @@ export default function Login() {
               className="absolute top-[38px] right-3 text-gray-500 hover:text-gray-700"
               tabIndex={-1}
             >
-              {showPassword ? <EyeOffIcon size={18} /> : <EyeIcon size={18} />}
+              {showPassword ? <EyeOffIcon size={18} /> : <EyeIcon  size={18} />}
             </button>
           </div>
 

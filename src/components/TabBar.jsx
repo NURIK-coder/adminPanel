@@ -9,7 +9,7 @@ import Mandad from "./Mandad";
 
 export default function TabBar() {
   const user = useSelector((state) => state.userInfo.user);
-  const [activeTab, setActiveTab] = useState(user.role !== 'dekan' && user.role !== 'kichik_admin' ? "faollik_indexi" : "gpa");
+  const [activeTab, setActiveTab] = useState(user.role !== 'dekan' && user.role !== 'kichik_admin' ? "faollik_indexi" : user.role !== 'kichik_admin'? "gpa": "mandad");
   
   
 
@@ -46,11 +46,11 @@ export default function TabBar() {
         ))}
       </div>
 
-      {activeTab === "faollik_indexi" &&  user.role !== 'dekan' && user.role !== 'kichik_admin'? (
+      {activeTab === "faollik_indexi" && user.role !== 'kichik_admin'? (
         <LeaderTable />
-      ) : (activeTab === "faollik_indexi" && user.role === 'dekan' || user.role === 'kichik_admin') ? (
+      ) : (activeTab === "gpa" && user.role === 'dekan' || user.role === 'kichik_admin') ? (
         <GpaLeaders  />
-      ): (user.role === 'dekan' || user.role === 'kichik_admin') ?(
+      ): (activeTab === "mandad" && user.role === 'dekan' || user.role === 'kichik_admin') ?(
         <Mandad/>
       ) : null}
     </div>

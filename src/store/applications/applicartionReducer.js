@@ -3,6 +3,7 @@ const InitialState = {
     applicationDetail:{},
     leaders: [],
     gpa_leaders: [],
+    mandad: []
 }
 
 export const ApplicationReduser = (state=InitialState, action)=>{
@@ -15,6 +16,8 @@ export const ApplicationReduser = (state=InitialState, action)=>{
             return{...state, leaders: action.payload}
         case 'SET_GPA_LEADERS':
             return{...state, gpa_leaders: action.payload}
+        case 'SET_MANDAD':
+            return{...state, mandad: action.payload}
         default:
             return state
     }

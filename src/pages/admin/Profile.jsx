@@ -4,11 +4,14 @@ import { store } from "../../store/store"
 import { CurrentUser } from "../../store/user/userActions"
 import AdminSidebar from "./AdminSideBar"
 import { useNavigate } from "react-router-dom"
+import ChangePasswordModal from "../../components/ChangePasswordModal"
 
 export default function Profile() {
   const user = useSelector(u => u.userInfo.user)
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   useEffect(() => {
         async function checkUser() {
             try {
@@ -77,8 +80,11 @@ export default function Profile() {
       <div className="bg-white p-6 rounded-lg shadow">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-semibold text-gray-800">Shaxsiy ma'lumotlar</h3>
-          <button className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600">
-            Tahrirlash
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600"
+          >
+            Parolni o'zgartirish
           </button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
@@ -165,6 +171,8 @@ export default function Profile() {
             )}
         </div>
       </div>
+      <ChangePasswordModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+
       
     </div>
   )

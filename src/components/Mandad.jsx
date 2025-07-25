@@ -22,7 +22,7 @@ export default function Mandad() {
 
 
   const { results = [], count = 0 } = useSelector(
-    (s) => s.applicationsInfo.gpa_leaders || {}
+    (s) => s.applicationsInfo.mandad || {}
   );
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -122,7 +122,7 @@ const filteredResults = results
     return (
       <div className="min-h-screen flex justify-center items-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">🎓 GPA Leaderboard</h2>
+          <h2 className="text-2xl font-bold mb-4">🎓 Mandat</h2>
           <p className="text-gray-500">Ma'lumotlar topilmadi</p>
           <p className="text-sm text-gray-400 mt-2">2 soniyadan so‘ng sahifa yangilanadi...</p>
         </div>
@@ -153,7 +153,7 @@ const filteredResults = results
 
   return (
     <div className="min-w-screen-lg mx-auto p-4">
-      <h2 className="text-2xl font-bold mb-4">🎓Mandad</h2>
+      <h2 className="text-2xl font-bold mb-4">🎓Mandat</h2>
 
       {/* Фильтры */}
       <div className="flex flex-wrap gap-4 mb-6 justify-end">
@@ -287,7 +287,7 @@ const filteredResults = results
                     
                   </td>
                   <td className="py-2 px-4 font-semibold">
-                    {student.gpa_records?.[0]?.gpa || "0.00"}
+                    {student.gpaball}
                   </td>
                   <td className="py-2 px-4">{student.gpaball}</td>
                   <td className="py-2 px-4">{student.university}</td>
