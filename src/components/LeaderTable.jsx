@@ -17,6 +17,8 @@ export default function LeaderTable() {
   const [selectedCourse, setSelectedCourse] = useState("");
   const [university, setUniversity] = useState("");
   const [toifa, setToifa] = useState("");
+  
+  
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [error, setError] = useState("");
@@ -24,7 +26,7 @@ export default function LeaderTable() {
   const courses = useSelector((state) => state.filterInfo.levels.levels || []);
   const universities = useSelector((state) => state.filterInfo.universities.universitys || []);
   const debounceTimeout = useRef(null);
-  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState(""); 
 
   
 
@@ -51,7 +53,7 @@ export default function LeaderTable() {
         faculty: selectedFaculty,
         course: selectedCourse,
         university,
-        toifa,
+        toifa
       })
     ).then(() => setLoading(false));
   }, [currentPage, debouncedSearch, selectedFaculty, selectedCourse, university, toifa]);
@@ -116,7 +118,7 @@ export default function LeaderTable() {
         >
           <option value="">Barcha universitetlar</option>
           {universities?.map((u, i) => (
-            <option key={i} value={u.name}>{u.name}</option>
+            <option key={i} value={u.id}>{u.name}</option>
           ))}
         </select>
 
@@ -147,9 +149,21 @@ export default function LeaderTable() {
             <option key={i} value={c.id}>{c.name}</option>
           ))}
         </select>
+        <select
+          value={toifa}
+          onChange={(e) => {
+            setToifa(e.target.value);
+            setCurrentPage(1);
+          }}
+          className="px-4 py-2 rounded border w-[220px]"
+        >
+          <option value="">Barcha ijtimoiy toifalar</option>
+          <option value="true">Ha</option>
+          <option value="false">Yoq</option>
+        </select>
 
         
-        <button className="p-2 rounded-md bg-green-500 shadow-xl flex gap-2 items-center hover:bg-green-600 " >{error || "Yuklab o'lish"} <img 
+        <button onClick={handleDownloadExcel} className="p-2 rounded-md bg-green-500 shadow-xl flex gap-2 items-center hover:bg-green-600 " >{error || "Yuklab o'lish"} <img 
         className="w-5 h-5"
         src="https://img.icons8.com/?size=100&id=83159&format=png&color=000000" alt="" /></button>
       </div>
@@ -169,7 +183,9 @@ export default function LeaderTable() {
                 <th className="px-6 py-3">#</th>
                 <th className="px-6 py-3">Talaba</th>
                 <th className="px-6 py-3">Fakultet</th>
-                <th className="px-6 py-3">Kurs / Guruh</th>
+                <th className="px-6 py-3">Universitet</th>
+                <th className="px-6 py-3">Ijtimoyi toifa reesti</th>
+                <th className="px-6 py-3">Kurs / Guruh</th> 
                 <th className="px-6 py-3">Ball</th>
               </tr>
             </thead>
@@ -183,6 +199,15 @@ export default function LeaderTable() {
                     <td className="px-6 py-4 text-center">{medal || globalIndex + 1}</td>
                     <td className="px-6 py-4">{leader.full_name || '-'}</td>
                     <td className="px-6 py-4">{leader.faculty || '-'}</td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center justify-center w-full h-full">
+                        {leader.toifa === false ? (
+                          <p className="p-2 rounded-xl bg-red-500 opacity-80 shadow-md text-white w-20 h-8 flex items-center justify-center ">Yoq</p>
+                        ):(
+                          <p className="p-2 rounded-xl bg-green-500 opacity-80 shadow-md text-white w-20 h-8 flex items-center justify-center ">Ha</p>
+                        )}
+                      </div>
+                    </td>
                     <td className="px-6 py-4">{leader.course || '-'} / {leader.group || '-'}</td>
                     <td className="px-6 py-4 text-right font-bold text-blue-600">
                       {leader.total_score || '0'}

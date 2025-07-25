@@ -259,17 +259,17 @@ export default function ApplicationsList() {
                             <div className="flex justify-between items-start">
                               <p className="text-lg font-medium text-gray-900">{item.direction_name}</p>
                               {item.files?.length > 0 ? (
-                                <a
-                                  href={item.files[0].file}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-sm text-white rounded p-2 bg-blue-700 mt-1"
-                                >
-                                  Faylni ko‘rish ⬆️
-                                </a>
-                              ) : (
-                                <span className="text-sm text-red-500 mt-1">Fayl yo‘q</span>
-                              )}
+                                  <a
+                                    href={item.files[0].file}
+                                    download
+                                    className="text-sm text-white rounded p-2 bg-blue-700 mt-1"
+                                  >
+                                    Faylni yuklab olish ⬇️
+                                  </a>
+                                ) : (
+                                  <span className="text-sm text-red-500 mt-1">Fayl yo‘q</span>
+                                )}
+
                             </div>
 
                             <div className="mt-4">
@@ -308,24 +308,10 @@ export default function ApplicationsList() {
                                   
                                   
                                   {item.direction_name != "Kitobxonlik madaniyati" && (
-                                     <div>
-                                      <p>
-                                        📊 <span className="font-medium text-gray-800">Test natijasi: </span>
-                                        {app?.test_result?.score != null ? `${app.test_result.score}%` : "Noma’lum"}
-                                      </p>
-                                      <p>
-                                        🧮 <span className="font-medium text-gray-800">Savollar so'ni:</span>{" "}
-                                        {app.test_result?.total ?? "0"} ta
-                                      </p>
-                                      <p>
-                                        ✅ <span className="font-medium text-gray-800">Togri javoblar so'ni:</span>{" "}
-                                        {app.test_result?.correct ?? "0"} 
-                                      </p>
-                                      <p>
-                                        ✍️ <span className="font-medium text-gray-800">Ball:</span>{" "}
-                                        {app.test_result?.ball ?? "0"} 
-                                      </p>
-                                    </div>
+                                     <p>
+                                      🎓 <span className="font-medium text-gray-800">GPA (ball):</span>{" "}
+                                      {item?.gpaball ?? "0"}
+                                    </p>
                                   )}
                                  
                                 </div>

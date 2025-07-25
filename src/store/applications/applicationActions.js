@@ -179,9 +179,14 @@ export const sendScoreWithAuth = (data) => async (dispatch, getState) => {
     // Если нужно вернуть успешный ответ
     return await response.json();
 };
-
+function parseBool(value) {
+  return value === 'true' || value === true;
+}
 export const LeaderList = ({page = 1, itemsPerPage=100, full_name='', faculty='', course='', university='', toifa=''}) => {
+  toifa = parseBool(toifa);
+    
     return async (dispatch) => {
+      
         const request = () =>
             fetch(URL + `admin/leaderboard/?page=${page}&page_size=${itemsPerPage}&full_name=${full_name}&faculty=${faculty}&course=${course}&univeresity=${university}&toifa=${toifa}`, {
                 method: "GET",
@@ -296,7 +301,7 @@ export const GetExel = () => {
 export const GetExelLeaderBoard = () => {
   return async () => {
     const request = () =>
-      fetch(URL + `api/leaderboard/?export=excel`, {
+      fetch(URL + `api/leaderboard/export/`, {
         method: "GET",
         headers: {
           "Authorization": `Bearer ${localStorage.getItem('token')}`,
