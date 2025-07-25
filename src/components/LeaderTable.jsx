@@ -199,6 +199,7 @@ export default function LeaderTable() {
                     <td className="px-6 py-4 text-center">{medal || globalIndex + 1}</td>
                     <td className="px-6 py-4">{leader.full_name || '-'}</td>
                     <td className="px-6 py-4">{leader.faculty || '-'}</td>
+                    <td className="px-6 py-4">{leader.university}</td>
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-center w-full h-full">
                         {leader.toifa === false ? (
@@ -208,6 +209,7 @@ export default function LeaderTable() {
                         )}
                       </div>
                     </td>
+                    
                     <td className="px-6 py-4">{leader.course || '-'} / {leader.group || '-'}</td>
                     <td className="px-6 py-4 text-right font-bold text-blue-600">
                       {leader.total_score || '0'}
