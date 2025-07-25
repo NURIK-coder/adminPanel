@@ -131,7 +131,7 @@ export default function ApplicationsList() {
   }
 
   async function handleDownload(url) {
-    const slicedUrl = url.replace('http://tanlov.medsfera.uz/', '');
+    const slicedUrl = url.replace('http://tanlov.medsfera.uz/media/', '');
     try {
       const response = await fetch(`https://tanlov.medsfera.uz/api/download/${slicedUrl}`, {
         method: 'GET',
