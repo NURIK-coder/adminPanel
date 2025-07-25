@@ -130,6 +130,16 @@ export default function ApplicationsList() {
     )
   }
 
+  const handleDownload = (url) => {
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "ariza.pdf"; // bu faylga brauzerda beriladigan nom
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+
   
 
 
@@ -259,17 +269,15 @@ export default function ApplicationsList() {
                             <div className="flex justify-between items-start">
                               <p className="text-lg font-medium text-gray-900">{item.direction_name}</p>
                               {item.files?.length > 0 ? (
-                                  <a
-                                    href={item.files[0].file}
-                                    download
-                                    className="text-sm text-white rounded p-2 bg-blue-700 mt-1"
-                                  >
-                                    Faylni yuklab olish ⬇️
-                                  </a>
-                                ) : (
-                                  <span className="text-sm text-red-500 mt-1">Fayl yo‘q</span>
-                                )}
-
+                                <button
+                                  onClick={() => handleDownload(item.files[0].file)}
+                                  className="text-sm text-white rounded p-2 bg-blue-700 mt-1"
+                                >
+                                  Faylni yuklab olish ⬇️
+                                </button>
+                              ) : (
+                                <span className="text-sm text-red-500 mt-1">Fayl yo‘q</span>
+                              )}
                             </div>
 
                             <div className="mt-4">
