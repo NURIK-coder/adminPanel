@@ -27,8 +27,8 @@ export default function ScoredApplications() {
   
   
 
-  const fetchApplications = async (page = 1, name = "") => {
-    await store.dispatch(ApplicationList(page, name));
+  const fetchApplications = async (page = 1, name = "", status='accepted') => {
+    await store.dispatch(ApplicationList(page, name, status));
     
     setLoading(false);
   };
@@ -92,20 +92,9 @@ export default function ScoredApplications() {
     }
   };
 
-  const filteredApplications = applications
-    ?.map(app => {
-      const trueItems = app.items?.filter(item => item.status === true);
-      console.log("app id:", app.id, "trueItems:", trueItems);
-      if (trueItems.length === 0) return null; // Удаляем заявку, если нет false-направлений
 
-      return {
-        ...app,
-        items: trueItems, // Оставляем только те items, у которых status === false
-      };
-    })
-    .filter(app => app !== null); // Убираем заявки без подходящих items
 
-  const groupedByDay = filteredApplications?.reduce((acc, app) => {
+  const groupedByDay = applications?.reduce((acc, app) => {
     const isoDate = new Date(app.submitted_at).toISOString().split("T")[0];
     if (!acc[isoDate]) acc[isoDate] = [];
     acc[isoDate].push(app);
@@ -201,17 +190,7 @@ export default function ScoredApplications() {
                                     if (expandedAppId !== app.id) {
                                         const res = await store.dispatch(ApplicationDetail(app.id));
                                         if (res?.payload) {
-                                            const filteredItems = res.payload.items?.filter(item => item.status === true);
-                                            
-                                            if (filteredItems.length === 0) {
-                                              // ничего не отображаем, если нет false-статусов
-                                              return;
-                                            }
-
-                                            setSelectedDetail({
-                                              ...res.payload,
-                                              items: filteredItems,
-                                            });
+                                            setSelectedDetail(res.payload);
                                             setExpandedAppId(app.id);
                                         }
 

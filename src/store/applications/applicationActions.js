@@ -60,10 +60,10 @@ export const loginAndSaveToken = async () => {
 
 
 
-export const ApplicationList = (page = 1, name='') => {
+export const ApplicationList = (page = 1, name='', status='') => {
     return async (dispatch) => {
         const request = () =>
-            fetch(`${URL}admin/applications/?page=${page}&student=${name}`, {
+            fetch(`${URL}admin/applications/?page=${page}&student=${name}&status=${status}`, {
                 method: "GET",
                 headers: {
                     "Authorization": `Bearer ${localStorage.getItem('token')}`,
