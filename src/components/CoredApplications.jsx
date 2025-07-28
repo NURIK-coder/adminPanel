@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { store } from "../store/store";
 import { ApplicationDetail, ApplicationList, GetExel, sendScoreWithAuth } from "../store/applications/applicationActions";
 import { CurrentUser } from "../store/user/userActions";
+import { Pagination } from "./pogintion";
 
 export default function ScoredApplications() {
   const applications = useSelector((a) => a.applicationsInfo.applications.results);
@@ -375,21 +376,10 @@ export default function ScoredApplications() {
         )}
 
         {/* Pagination */}
-        <div className="flex justify-center mt-8 gap-2 flex-wrap">
-          {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
-            <button
-              key={page}
-              onClick={() => setCurrentPage(page)}
-              className={`px-4 py-2 rounded ${
-                currentPage === page
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-              }`}
-            >
-              {page}
-            </button>
-          ))}
-        </div>
+        <Pagination
+        totalPages={totalPages}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}/>
       </div>
     </div>
   );

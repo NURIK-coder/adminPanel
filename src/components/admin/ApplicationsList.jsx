@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { store } from "../../store/store";
-import { ApplicationDetail, ApplicationList, GetExel, sendScoreWithAuth } from "../../store/applications/applicationActions";
+import { ApplicationDetail, ApplicationList, GetExel, GetExelApplications, GetExelLeaderBoard, sendScoreWithAuth } from "../../store/applications/applicationActions";
 import { CurrentUser } from "../../store/user/userActions";
+import { Pagination } from "../pogintion";
 
 export default function ApplicationsList() {
   const applications = useSelector((a) => a.applicationsInfo.applications.results);
@@ -96,7 +97,6 @@ export default function ApplicationsList() {
   const filteredApplications = applications
     ?.map(app => {
       const falseItems = app.items?.filter(item => item.status === false);
-      console.log("app id:", app.id, "falseItems:", falseItems);
       if (falseItems.length === 0) return null; // Удаляем заявку, если нет false-направлений
 
       return {
@@ -131,43 +131,70 @@ export default function ApplicationsList() {
   }
 
   async function handleDownload(url) {
-    const slicedUrl = url.replace('http://tanlov.medsfera.uz/media/', '');
+    const baseUrl = 'http://tanlov.medsfera.uz/media/';
+    const downloadBase = 'https://tanlov.medsfera.uz/api/download/';
+
+    // Удаляем базовый путь
+    const slicedPath = url.replace(baseUrl, '');
+
+    // Декодируем на случай, если уже закодировано
+    const parts = slicedPath.split('/').map(p => decodeURIComponent(p));
+
+    // Потом снова кодируем правильно
+    const encodedPath = parts.map(part => encodeURIComponent(part)).join('/');
+
+    console.log('👉 Encoded download URL:', `${downloadBase}${encodedPath}`);
+
     try {
-      const response = await fetch(`https://tanlov.medsfera.uz/api/download/${slicedUrl}`, {
+      const response = await fetch(`${downloadBase}${encodedPath}/`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
         },
       });
 
-      if (!response.ok) {
-        throw new Error('Download failed');
-      }
+      if (!response.ok) throw new Error(`Download failed with status ${response.status}`);
 
       const blob = await response.blob();
       const downloadUrl = window.URL.createObjectURL(blob);
 
       const link = document.createElement('a');
       link.href = downloadUrl;
-
-      // Fayl nomini URL ichidan olish (ixtiyoriy)
-      const fileName = url.split('/').pop() || 'fayl';
-      link.download = fileName;
-
+      link.download = parts[parts.length - 1];
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
 
-      // URLni tozalash
       window.URL.revokeObjectURL(downloadUrl);
     } catch (error) {
-      console.error('Download error:', error);
+      console.error('❌ Download error:', error);
       alert('Faylni yuklab bo‘lmadi.');
     }
-}
+  }
 
 
-  
+
+
+  const handleDownloadExcel = async () => {
+          try {
+            const response = await store.dispatch(GetExelApplications());
+            
+            if (response?.payload) {
+              const url = window.URL.createObjectURL(response.payload);
+              const link = document.createElement("a");
+              link.href = url;
+              link.setAttribute("download", "arizalar.xlsx");
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              window.URL.revokeObjectURL(url);
+            } else {
+              setError("Excel faylni yuklab bo‘lmadi");
+            }
+          } catch (err) {
+            setError(err.message || "Xatolik yuz berdi");
+          }
+  };
 
 
  
@@ -196,7 +223,14 @@ export default function ApplicationsList() {
               />
               
           </form>
-          
+          <button onClick={handleDownloadExcel} 
+            className="p-2 rounded-md bg-green-500 shadow-xl flex gap-2 items-center hover:bg-green-600 " 
+          >
+              Yuklab o'lish
+            <img 
+            className="w-5 h-5"
+            src="https://img.icons8.com/?size=100&id=83159&format=png&color=000000" alt="" />
+          </button>
 
         </div>
 
@@ -431,21 +465,10 @@ export default function ApplicationsList() {
         )}
 
         {/* Pagination */}
-        <div className="flex justify-center mt-8 gap-2 flex-wrap">
-          {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
-            <button
-              key={page}
-              onClick={() => setCurrentPage(page)}
-              className={`px-4 py-2 rounded ${
-                currentPage === page
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-              }`}
-            >
-              {page}
-            </button>
-          ))}
-        </div>
+        <Pagination 
+        totalPages={totalPages}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}/>
       </div>
     </div>
   );

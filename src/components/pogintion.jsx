@@ -34,7 +34,7 @@ export const Pagination = ({ totalPages, currentPage, setCurrentPage }) => {
         disabled={currentPage === 1}
         className="px-3 py-1 rounded-md text-sm bg-gray-100 hover:bg-gray-200 disabled:opacity-50 transition"
       >
-        ←
+        ← Orqaga
       </button>
 
       {/* Кнопки страниц */}
@@ -67,7 +67,7 @@ export const Pagination = ({ totalPages, currentPage, setCurrentPage }) => {
         disabled={currentPage === totalPages}
         className="px-3 py-1 rounded-md text-sm bg-gray-100 hover:bg-gray-200 disabled:opacity-50 transition"
       >
-        →
+        Oldinga →
       </button>
     </div>
   );

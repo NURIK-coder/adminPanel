@@ -372,3 +372,38 @@ export const getMandad = ({
     }
   };
 };
+
+
+export const GetExelApplications = () => {
+  return async () => {
+    const request = () =>
+      fetch(URL + `admin/applications/export/`, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${localStorage.getItem('token')}`,
+        }
+      });
+
+    let res = await request();
+
+    if (res.status === 401) {
+      const refreshed = await refreshToken();
+      if (!refreshed) {
+        await loginAndSaveToken();
+        res = await request();
+      }
+    }
+
+    if (res.status === 403) {
+      const error = await res.json();
+      throw new Error(error.detail || "Xatolik yuz berdi.");
+    }
+
+    if (res.ok) {
+      const blob = await res.blob();
+      return { payload: blob };
+    }
+
+    throw new Error("Yuklab olishda xatolik yuz berdi.");
+  };
+};
