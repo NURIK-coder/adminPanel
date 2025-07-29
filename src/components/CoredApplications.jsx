@@ -177,7 +177,7 @@ export default function ScoredApplications() {
                       <div className="flex flex-col items-end gap-2">
                             {app.status === "accepted" && (
                                 <span className="bg-green-100 text-green-700 text-sm rounded-full px-3 py-1 font-medium">
-                                ✔ Tasdiqlandi
+                                ✔ Tekshirildi
                                 </span>
                             )}
                             {app.status === "pending" && (
